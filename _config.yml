@@ -13,7 +13,7 @@ title: Kingsley Chukwu's Portfolio # This is what shows up in the tab of the bro
 
 # Hero Section
 name: Kingsley Chukwu
-headline: headline message
+headline: About me
 description: >- # dont remove this line. this will ignore all new lines until the next section
   I am currently an Staff EDA Tools Software Engineer at Intel Corporation. I am interested in low-level optimization for CUDA/C++ codes for deep learning applications.
 
