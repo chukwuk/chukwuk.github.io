@@ -12,10 +12,12 @@ title: Kingsley Chukwu's Portfolio # This is what shows up in the tab of the bro
 
 
 # Hero Section
-name: Kingsley Chukwu
+name: Kingsley Chukwu, PhD.
 headline: About me
 description: >- # dont remove this line. this will ignore all new lines until the next section
-  I am currently an Staff EDA Tools Software Engineer at Intel Corporation. I am interested in low-level optimization for CUDA/C++ codes for deep learning applications.
+  I am currently an Staff EDA Tools Software Engineer at Intel Corporation. My current work at Intel Corporation involves programmming standard design rules in ICV and Calibre, automating workflow in Linux, develop and implement Runset Testcase Generator (RTG) testcase for ICV runset codes, code and debug LVS runset. I spend my spare time writing C++ codes and CUDA kernels for deep learning application, profiling CUDA kernels using Nsight to identify areas for optimization.  
+
+  I have an MEng in Computer Science and PhD in Chemical Engineering from Oregon State University. 
 
 # Place your profile image in /assets/images/profile-image/folder and edit the file name
 profile_image: ./assets/images/profile-image/avatar.jpeg
