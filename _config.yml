@@ -15,7 +15,7 @@ title: Kingsley Chukwu's Portfolio # This is what shows up in the tab of the bro
 name: Kingsley Chukwu, PhD.
 headline: About me
 description: >- # dont remove this line. this will ignore all new lines until the next section
-  I am currently an Staff EDA Tools Software Engineer at Intel Corporation. My current work at Intel Corporation involves programmming standard design rules in ICV and Calibre, automating workflow in Linux, develop and implement Runset Testcase Generator (RTG) testcase for ICV runset codes, code and debug LVS runset. I am also a part-time GPU Software Engineer (CUDA), in which I write C++ codes and CUDA kernels for deep learning application, profiling CUDA kernels using Nsight to identify areas of optimization.  
+  I am currently a Staff EDA Tools Software Engineer at Intel Corporation. My current work at Intel Corporation involves programmming standard design rules in ICV and Calibre, automating workflow in Linux, develop and implement Runset Testcase Generator (RTG) testcase for ICV runset codes, code and debug LVS runset. I am also a part-time GPU Software Engineer (CUDA), in which I write C++ codes and CUDA kernels for deep learning application, profiling CUDA kernels using Nsight to identify areas of optimization.  
 
   I have an MEng in Computer Science and PhD in Chemical Engineering from Oregon State University. 
 
