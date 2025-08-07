@@ -141,8 +141,10 @@ lemon theme:
 collections:
   projects:
     output: true
-    permalink: /projects/:path/
-
+    permalink: /projects/:path/ 
+  blogs:
+    output: true
+    permalink: /blogs/:path/
 
 markdown: kramdown
 highlighter: rouge
@@ -162,6 +164,7 @@ plugins:
 
 include:
   - _projects
+  - _blogs
 
 
 # Exclude from processing.
