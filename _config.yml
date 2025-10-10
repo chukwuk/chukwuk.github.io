@@ -51,12 +51,19 @@ skills:
     - Calibre. 
     - Linux.
     - Tcl.
+    - High Performance Computing (HPC).
   - category: Parallel Programming
-    Programming language:
-    - CUDA.
     tools:
-    - nsight compute.
-    - nsight systems.
+    - CUDA.
+    - OpenMP.
+    - OpenCL. 
+    - Nsight Compute.
+    - Nsight Systems.
+  - category: Programming. 
+    tools:
+    - C++/C.
+    - Python.
+    - Bash.
 
 # Contact Form Setup. Setup an account and copy over the key. When someone fills out the form, it will be received in your email.
 formspree-key:   https://formspree.io/f/{8-digit key}
