@@ -45,14 +45,14 @@ external-links:    # input only your own url slug. The icons with missing entrie
 
 # Skills Section - Add the list of your Skills by categories/tools. The indentation for each level needs to be precise. 
 skills:
-  - category: EDA Tools
+  - category: EDA Tools.
     tools:
     - Synopsys(ICV Validator, ICV Workbench)
     - Calibre. 
     - Linux.
     - Tcl.
     - High Performance Computing (HPC).
-  - category: Parallel Programming
+  - category: Parallel Programming.
     tools:
     - CUDA.
     - OpenMP.
