@@ -3,7 +3,7 @@
     <h2>Projects</h2>
 
     <div class="grid-container">
-        {% for item in site.projects %}
+        {% for item in site.blogs %}
     <a href="{{ item.url }}" class="project-link">
         <div class="project-card">
             {% assign folder_path = item.path | split: "/" | slice: 0, 2 | join: "/" %}
