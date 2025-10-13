@@ -18,6 +18,8 @@ Used for the title (already generated automatically at the top)
 ## Header 2  
 Use this for the header of each section
 ### Header 3 
+Euclidean distance matrix (EDM) applications include machine learning (e.g., dimensionality reduction, clustering), bioinformatics (e.g., molecular conformation), sensor network localization, and signal processing (e.g., microphone position calibration). EDMs are used to represent the squared distances between points in space, with their inherent mathematical properties making them useful for solving inverse problems, reconstructing point configurations, and completing incomplete distance data.
+
 Use this to have subsection if needed
 
 
