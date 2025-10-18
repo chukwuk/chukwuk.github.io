@@ -8,7 +8,7 @@ skills:
   - Pytorch.
   - Python programming.
 
-main-image: /project1.jpg
+main-image: /project1.png
 ---
 
 # This is another demo
