@@ -9,7 +9,6 @@ skills:
   - Memory Hierarchy. 
   - CUDA Pipleines.
 
-main-image: /project1.png
 ---
 
 ---

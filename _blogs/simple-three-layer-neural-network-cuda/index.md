@@ -7,8 +7,6 @@ skills:
   - C++/C programming.
   - Pytorch.
   - Python programming.
-
-main-image: /project1.png
 ---
 
 # This is another demo

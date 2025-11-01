@@ -8,7 +8,6 @@ skills:
   - CUDA Streams.
   - Asynchronous and synchronous data transfer. 
 
-main-image: /project1.png
 ---
 
 ---
