@@ -395,7 +395,7 @@ nav .mobile-nav {
 
 .blog-grid-section .grid-container {
     display: grid;
-    grid-template-rows: repeat(auto-fit, minmax(450px, 1fr));
+    grid-template-rows: 1fr;
     gap: 25px;
     width: 100%;
     margin: 0 auto;
