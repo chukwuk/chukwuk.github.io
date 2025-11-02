@@ -11,10 +11,10 @@ skills:
 ---
 
 ---
-# Application of CUDA streams for computing reduction of 2D array along the rows.
-
 ## Introduction  
-CUDA kernel
+CUDA streams is an advanced feature of CUDA programming toolkit that allows the overlap of data transfer with kernel execution. According to [Mark Harris's blog post](https://developer.nvidia.com/blog/how-overlap-data-transfers-cuda-cc/), a stream in CUDA is a sequence of operation that execute on the device in the order in which they are issued by the host code. While operations within a stream are guaranteed to execute in the prescribed order, operations in different streams can be interleaved and, when possible, they can even run concurrently. 
+In this technical blog post, I will discuss how to apply CUDA streams in kernel computation for the reduction of 2D array along the rows. Reduction of 2D/3D array along an axis is a computational operation in deep learning.  
+
 ### Header 3 
 Euclidean distance matrix (EDM) applications include machine learning (e.g., dimensionality reduction, clustering), bioinformatics (e.g., molecular conformation), sensor network localization, and signal processing (e.g., microphone position calibration). EDMs are used to represent the squared distances between points in space, with their inherent mathematical properties making them useful for solving inverse problems, reconstructing point configurations, and completing incomplete distance data.
 
