@@ -281,7 +281,7 @@ nav .mobile-nav {
 
 .project-grid-section .grid-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    grid-template-rows: 1fr;
     gap: 25px;
     width: 100%;
     margin: 0 auto;
