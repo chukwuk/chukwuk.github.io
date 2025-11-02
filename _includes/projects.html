@@ -1,18 +1,18 @@
 <!-- SECTION 3: project -->
-<section id="projects" class="blog-grid-section">
+<section id="blog" class="blog-grid-section">
     <h2>Projects</h2>
 
     <div class="grid-container">
         {% for item in site.blogs %}
-    <a href="{{ item.url }}" class="project-link">
-        <div class="project-card">
-            <h3 class="project-title">{{ item.title }}</h3>
-            <div class="project-skills">
+    <a href="{{ item.url }}" class="blog-link">
+        <div class="blog-card">
+            <h3 class="blog-title">{{ item.title }}</h3>
+            <div class="blog-skills">
                 {% for skill in item.skills %}
                     <span class="skill">{{ skill }}</span>
                 {% endfor %}
             </div>
-            <p class="project-description">{{ item.description }}</p>
+            <p class="blog-description">{{ item.description }}</p>
             <button class="read-more">Read more →</button>
         </div>
     </a>
