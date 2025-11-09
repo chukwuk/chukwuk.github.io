@@ -15,6 +15,10 @@ skills:
 CUDA streams is an advanced feature of CUDA programming toolkit that allows the overlap of data transfer with kernel execution. A stream in CUDA is a command sequence issued on the device by the host code, in which the command sequence execute on device in the order it was issued by the host code. Command sequence within a stream are guaranteed to execute in the specified order but command sequence in different streams can be interleaved and, when possible, they can even run concurrently. 
 In this technical blog post, I will discuss how to apply CUDA streams in CUDA kernel computation for the reduction of 2D array along the rows. Reduction of 2D/3D array along an axis is a common computational operation in deep learning. The code used in this blog was ran on Nvidia RTX 5070 Ti.  
 
+## CUDA Execution Flow
+
+There are two CUDA execution flow, which are the serial execution flow (default stream) and concurrent execution flow (non-default stream). Figure 1 shows the different CUDA execution flow on NVIDIA RTX 5070 Ti. To learn more about the different CUDA execution model, please visit [Mark Harris blog post](https://developer.nvidia.com/blog/how-overlap-data-transfers-cuda-cc/) 
+
 ### Embeed images
 {% include image-gallery.html images="Asynchronous_transfer_4.png" height="400" %} 
 
