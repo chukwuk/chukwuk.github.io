@@ -65,6 +65,25 @@ __global__  void reductionSum(int* reduceData, int* sumData, unsigned long int n
 }
 ```
 
+## Implemention for the default stream and non-default stream. 
+
+
+```cuda
+  status = cudaMemcpy(reduceDataDev, reduceData, reduceDataSize, cudaMemcpyHostToDevice );
+  // checks for cuda errors
+  checkCudaErrors( status,"cudaMemcpy(reduceDataDev, reduceData, reduceDataSize, cudaMemcpyHostToDevice );");  
+  // kernel execution
+  reductionSum<<< grid, threads >>>( reduceDataDev, sumDataDev, sumNumData, nCols, 0);
+  status = cudaDeviceSynchronize( );
+   // checks for cuda errors
+  checkCudaErrors( status," reductionSum<<< grid, threads >>>( reduceDataDev, sumDataDev, numData, sumNumData); ");
+  status = cudaGetLastError(); 
+  checkCudaErrors( status,"cudaGetLastError()");   
+  // copy data from device memory to host 
+  cudaMemcpy(sumData, sumDataDev, sumDataSize, cudaMemcpyDeviceToHost);  
+  // checks for cuda errors
+  checkCudaErrors( status, " cudaMemcpy(sumData, sumDataDev,  sumDataSize , cudaMemcpyDeviceToHost);"); 
+```
 
 ## References
 * [How to Overlap Data Transfers in CUDA C/C++](https://developer.nvidia.com/blog/how-overlap-data-transfers-cuda-cc/)
