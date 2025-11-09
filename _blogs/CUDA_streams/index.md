@@ -22,6 +22,26 @@ In this technical blog post, I will discuss how to apply CUDA streams in CUDA ke
 
 <br>
 
+```cuda
+// A simple CUDA kernel to reduce 2D along the row
+
+__global__  void reductionSum(int* reduceData, int* sumData, unsigned long int numData, unsigned int nCols, int offset ) {
+
+   int gid = offset + (blockIdx.x *  blockDim.x +  threadIdx.x);
+   size_t shift = (size_t)gid *  (size_t) nCols;
+   if (gid < (offset + numData)) {
+      int sum = 0;
+      for (size_t i = 0; i < nCols; i++) {
+          sum += reduceData[shift + i];
+      }
+      sumData[gid] = sum;
+   }
+
+}
+
+
+```
+
 
 ## References
 * [How to Overlap Data Transfers in CUDA C/C++](https://developer.nvidia.com/blog/how-overlap-data-transfers-cuda-cc/)
