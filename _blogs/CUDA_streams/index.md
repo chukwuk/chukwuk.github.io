@@ -19,7 +19,7 @@ In this technical blog post, I will discuss how to apply CUDA streams in CUDA ke
 
 There are two CUDA execution flow, which are the serial execution flow (default stream) and concurrent execution flow (non-default stream). Figure 1 shows the different CUDA execution flow on NVIDIA RTX 5070 Ti. To learn more about the different CUDA execution model, please visit [Mark Harris blog post](https://developer.nvidia.com/blog/how-overlap-data-transfers-cuda-cc/) 
 
-### Embeed images
+### Execution flow for default(single) stream and non-default(mutiple) stream on Nvidia RTX 5070 Ti
 {% include image-gallery.html images="Asynchronous_transfer_4.png" height="400" %} 
 
 <br>
@@ -28,7 +28,7 @@ There are two CUDA execution flow, which are the serial execution flow (default 
 
 ## Kernel implemention for 2D array summation along the row for default stream and non-default stream
 
-For the default stream kernel implementation, each GPU thread sums all the element in the same row. Row major storage is used for the 2D array storage in GPU memory. The kernel implementation can also be used for 2D array summation along the column but the column major storage should be used to store the 2D array in the GPU memory and the variable nCols (number of columns) will be replaced with number of rows. The default stream kernel implementation will not work for the non-default stream because the kernel execution in each stream will be operate on the same data. Therefore, in the kernel implementation for the non-default stream, the offset variable is used to calculate the section of the 2D array data for the operation by the kernel execution in the different streams.         
+For the default stream kernel implementation, each GPU thread sums all the element in the same row. Row major storage is used for the 2D array storage in GPU memory. The kernel implementation can also be used for 2D array summation along the column but the column major storage should be used to store the 2D array in the GPU memory and the variable nCols (number of columns) will be replaced with number of rows. The default stream kernel implementation will not work for the non-default stream because the kernel execution in each stream will be operate on the same section of the data. In the non-default stream, the kernel execution in different streams should operate on different section of the 2D array data. Therefore, in the kernel implementation for the non-default stream, the offset variable is used to calculate the section of the 2D array data for the operation by the kernel execution in the different streams.         
 
 ```cuda
 // A simple CUDA kernel to reduce 2D array along the row for default(single) stream.
