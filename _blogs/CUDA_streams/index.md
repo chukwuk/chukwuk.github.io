@@ -23,7 +23,7 @@ In this technical blog post, I will discuss how to apply CUDA streams in CUDA ke
 <br>
 
 ```cuda
-// A simple CUDA kernel to reduce 2D along the row
+// A simple CUDA kernel to reduce 2D array along the row
 
 __global__  void reductionSum(int* reduceData, int* sumData, unsigned long int numData, unsigned int nCols, int offset ) {
 
@@ -36,10 +36,7 @@ __global__  void reductionSum(int* reduceData, int* sumData, unsigned long int n
       }
       sumData[gid] = sum;
    }
-
 }
-
-
 ```
 
 
