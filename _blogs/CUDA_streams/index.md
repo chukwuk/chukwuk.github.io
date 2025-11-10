@@ -70,6 +70,7 @@ __global__  void reductionSum(int* reduceData, int* sumData, unsigned long int n
 The default stream involves data transfer from the CPU(host) memory to GPU(device) memory, kernel execution on the transfered data and then the data is transfered back from GPU(device) memory to CPU(host) memory. The non-default stream involves splitting the data transfered to the device memory into N batch, in which N is the number of streams. The kernel exection in each stream would operate on only one batch of the N batches. The number of element in each batch should be a multiple of nCols(number of columns) in order to avoid reading incorrect data from the device memory during kernel execution. Each stream will transfer the results back to the host memory. The code is available on [Github repo](https://github.com/chukwuk/CUDA_streams).       
 
 ```cuda
+  // the default stream 
   // copy data from host memory to the device:
   status = cudaMemcpy(reduceDataDev, reduceData, reduceDataSize, cudaMemcpyHostToDevice );
   // checks for cuda errors
@@ -88,6 +89,7 @@ The default stream involves data transfer from the CPU(host) memory to GPU(devic
 ```
 
 ```cuda
+ // version I of the non-default stream
  for (int i = 0; i < nStreams; ++i) { 
     unsigned long int offset = i * streamSize; 
     int offsetResult = i * streamSizeResult;
@@ -98,6 +100,7 @@ The default stream involves data transfer from the CPU(host) memory to GPU(devic
 ```
 
 ```cuda
+  // version II of the non-default stream
   for (int i = 0; i < nStreams; ++i) { 
     unsigned long int offset = i * streamSize;
     cudaMemcpyAsync(&reduceStrOneDataDev[offset], &reduceStrOneData[offset], streamBytes, cudaMemcpyHostToDevice, stream[i]);  
