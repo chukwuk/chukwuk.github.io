@@ -33,7 +33,7 @@ For the default stream kernel implementation, each GPU thread sums all the eleme
 ```cuda
 // A simple CUDA kernel to reduce 2D array along the row for default(single) stream.
 
-__global__  void reductionSum(int* reduceData, int* sumData, unsigned long int numData, unsigned int nCols) {
+__global__  void reductionSumDefaultStream(int* reduceData, int* sumData, unsigned long int numData, unsigned int nCols) {
 
    int gid = (blockIdx.x *  blockDim.x +  threadIdx.x);
    size_t shift = (size_t)gid *  (size_t) nCols;
@@ -69,18 +69,19 @@ __global__  void reductionSum(int* reduceData, int* sumData, unsigned long int n
 
 
 ```cuda
+  // copy data from host memory to the device:
   status = cudaMemcpy(reduceDataDev, reduceData, reduceDataSize, cudaMemcpyHostToDevice );
   // checks for cuda errors
   checkCudaErrors( status,"cudaMemcpy(reduceDataDev, reduceData, reduceDataSize, cudaMemcpyHostToDevice );");  
-  // kernel execution
-  reductionSum<<< grid, threads >>>( reduceDataDev, sumDataDev, sumNumData, nCols, 0);
-  status = cudaDeviceSynchronize( );
-   // checks for cuda errors
-  checkCudaErrors( status," reductionSum<<< grid, threads >>>( reduceDataDev, sumDataDev, numData, sumNumData); ");
+ 
+  // kernel launch 
+  reductionSumDefaultStream<<< grid, threads >>>( reduceDataDev, sumDataDev, sumNumData, nCols);
   status = cudaGetLastError(); 
-  checkCudaErrors( status,"cudaGetLastError()");   
+  // check for cuda errors
+  checkCudaErrors( status," reductionSum<<< grid, threads >>>( reduceDataDev, sumDataDev, numData, sumNumData); ");
+
   // copy data from device memory to host 
-  cudaMemcpy(sumData, sumDataDev, sumDataSize, cudaMemcpyDeviceToHost);  
+  status = cudaMemcpy(sumData, sumDataDev, sumDataSize, cudaMemcpyDeviceToHost);  
   // checks for cuda errors
   checkCudaErrors( status, " cudaMemcpy(sumData, sumDataDev,  sumDataSize , cudaMemcpyDeviceToHost);"); 
 ```
