@@ -119,8 +119,10 @@ The default stream involves data transfer from the CPU(host) memory to GPU(devic
 
 ## Implemention for the non-default stream when data connot fit in GPU memory. 
 
+The version I non-default stream implementation when data cannot fit in GPU memory is the same as for the case when the all data fit in GPU memory. This was due to the fact, that each stream completes all its executions on device before the next streamstart its execution. However, version II non-default stream implementation when data cannot fit in GPU memory is not the same as the case when when the data fit in GPU memory because all streams copies all data from host to device memory before each stream start their respective kernel execution. Therefore, the version II non-default stream implementation when data fit in GPU memory would lead to memory data overwrite before kernel execution.      
 
 ```cuda
+// version I non-default stream implementation
 for (int i = 0; i < nStreams; ++i) { 
    unsigned long int offset = i * streamSize; 
    unsigned long int offsetResult = i * streamSizeResult;
@@ -132,6 +134,7 @@ for (int i = 0; i < nStreams; ++i) {
 
 
 ```cuda
+version II non-default stream implementation
 for (int i = 0; i < nStreams; i+= nStreamsFitGPU) {     
    for (int j = 0, k = i; k < nStreams && j < nStreamsFitGPU; ++j, k++ ) { 
       unsigned long int offset = k * streamSize;
@@ -148,6 +151,10 @@ for (int i = 0; i < nStreams; i+= nStreamsFitGPU) {
 }
 ```
 
+## Runtime comparison. 
+
+The version II non-default implementation has the lowest runtime because it hides the kernel execution time through overlap data transfer andkernel execution. The version I non-default stream implementation has the same runtime with the default stream implemention because there is no overlap of data transfer and kernel execution. 
+
 ```cuda
 Time for sequential transfer and execute: 303.725983 milliseconds
 Time for asynchronous V1 transfer and execute (ms): 299.870117 milliseconds
@@ -160,6 +167,10 @@ Time for asynchronous V1 transfer and execute (ms): 5669.757812 milliseconds
 Time for asynchronous V2 transfer and execute (ms): 3936.488770 milliseconds
 ```
 
+## Conclusion.
+
+The blog post discussed the application of CUDA streams for kernel implementation for summation of 2D array along the rows. 
+ 
 ## References
 * [How to Overlap Data Transfers in CUDA C/C++](https://developer.nvidia.com/blog/how-overlap-data-transfers-cuda-cc/)
 * [CUDA Streams and Concurrency](https://developer.download.nvidia.com/CUDA/training/StreamsAndConcurrencyWebinar.pdf) 
