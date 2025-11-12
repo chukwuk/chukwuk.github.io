@@ -119,6 +119,15 @@ The default stream involves data transfer from the CPU(host) memory to GPU(devic
 
 ## Implemention for the non-default stream when data connot fit in GPU memory. 
 
+Time for asynchronous V1 transfer and execute (ms): 5669.757812 milliseconds
+Time for asynchronous V2 transfer and execute (ms): 3936.488770 milliseconds
+
+Time for sequential transfer and execute: 303.725983 milliseconds
+Time for asynchronous V1 transfer and execute (ms): 299.870117 milliseconds
+Time for asynchronous V2 transfer and execute (ms): 273.592133 milliseconds
+
+
+
 ## References
 * [How to Overlap Data Transfers in CUDA C/C++](https://developer.nvidia.com/blog/how-overlap-data-transfers-cuda-cc/)
 * [CUDA Streams and Concurrency](https://developer.download.nvidia.com/CUDA/training/StreamsAndConcurrencyWebinar.pdf) 
