@@ -119,6 +119,47 @@ The default stream involves data transfer from the CPU(host) memory to GPU(devic
 
 ## Implemention for the non-default stream when data connot fit in GPU memory. 
 
+
+```cuda
+for (int i = 0; i < nStreams; ++i) { 
+   unsigned long int offset = i * streamSize; 
+   unsigned long int offsetResult = i * streamSizeResult;
+   cudaMemcpyAsync(&reduceStrDataDev[offset % numGPUData], &reduceStrData[offset], streamBytes, cudaMemcpyHostToDevice, stream[i]);  
+   reductionSum<<<grid, threads, 0, stream[i]>>>( reduceStrDataDev, sumStrDataDev, streamSizeResult, nCols, offsetResult % sumGPUNumData);
+   cudaMemcpyAsync(&sumStrData[offsetResult ], &sumStrDataDev[offsetResult % sumGPUNumData ], streamBytesResult, cudaMemcpyDeviceToHost, stream[i]);
+}
+```
+
+
+```cuda
+for (int i = 0; i < nStreams; i+= nStreamsFitGPU) {     
+   for (int j = 0, k = i; k < nStreams && j < nStreamsFitGPU; ++j, k++ ) { 
+      unsigned long int offset = k * streamSize;
+      cudaMemcpyAsync(&reduceStrOneDataDev[offset % numGPUData], &reduceStrOneData[offset], streamBytes, cudaMemcpyHostToDevice, stream[j]);   
+   }
+   for (int j = 0, k = i; k < nStreams && j < nStreamsFitGPU; ++j, k++ ) { 
+      unsigned long int offsetResult = k * streamSizeResult;
+      reductionSum<<<grid, threads, 0, stream[j]>>>( reduceStrOneDataDev, sumStrOneDataDev, streamSizeResult, nCols, offsetResult % sumGPUNumData);
+   }
+   for (int j = 0, k = i; k < nStreams && j < nStreamsFitGPU; ++j, k++ ) { 
+     unsigned long int offsetResult = k * streamSizeResult;
+     cudaMemcpyAsync(&sumStrOneData[offsetResult], &sumStrOneDataDev[offsetResult % sumGPUNumData ], streamBytesResult, cudaMemcpyDeviceToHost, stream[j]);
+   }
+}
+```
+
+```cuda
+Time for sequential transfer and execute: 303.725983 milliseconds
+Time for asynchronous V1 transfer and execute (ms): 299.870117 milliseconds
+Time for asynchronous V2 transfer and execute (ms): 273.592133 milliseconds
+```
+
+
+```cuda
+Time for asynchronous V1 transfer and execute (ms): 5669.757812 milliseconds
+Time for asynchronous V2 transfer and execute (ms): 3936.488770 milliseconds
+```
+
 ## References
 * [How to Overlap Data Transfers in CUDA C/C++](https://developer.nvidia.com/blog/how-overlap-data-transfers-cuda-cc/)
 * [CUDA Streams and Concurrency](https://developer.download.nvidia.com/CUDA/training/StreamsAndConcurrencyWebinar.pdf) 
