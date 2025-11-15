@@ -153,7 +153,7 @@ for (int i = 0; i < nStreams; i+= nStreamsFitGPU) {
 
 ## Runtime comparison. 
 
-The version II non-default implementation has the lowest runtime because it hides the kernel execution time through overlap data transfer andkernel execution. The version I non-default stream implementation has the same runtime with the default stream implemention because there is no overlap of data transfer and kernel execution. 
+The version II non-default implementation has the lowest runtime because it hides the kernel execution time through overlap data transfer and kernel execution. The version I non-default stream implementation has the same runtime with the default stream implemention because there is no overlap of data transfer and kernel execution. 
 
 ```cuda
 // Runtime for default and non-default stream implementation when all data fit can in GPU memory at once
