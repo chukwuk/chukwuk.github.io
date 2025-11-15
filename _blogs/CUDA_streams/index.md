@@ -17,7 +17,7 @@ In this technical blog post, I will discuss how to apply CUDA streams in CUDA ke
 
 ## CUDA Execution Flow
 
-There are two CUDA execution flow, which are the serial execution flow (default stream) and concurrent execution flow (non-default stream). Figure 1 shows the different CUDA execution flow on NVIDIA RTX 5070 Ti. This execution flow was based on the fact that NVIDIA RTX 5070 Ti has only one copy engine, which was determined by the asyncEngineCount field of the cudaDeviceProp structure. To learn more about the different CUDA execution model, please visit [Mark Harris blog post](https://developer.nvidia.com/blog/how-overlap-data-transfers-cuda-cc/) 
+There are two CUDA execution flow, which are the serial execution flow (default stream) and concurrent execution flow (non-default stream). Figure below shows the different CUDA execution flow on NVIDIA RTX 5070 Ti. This execution flow was based on the fact that NVIDIA RTX 5070 Ti has only one copy engine, which was determined by the asyncEngineCount field of the cudaDeviceProp structure. To learn more about the different CUDA execution model, please visit [Mark Harris blog post](https://developer.nvidia.com/blog/how-overlap-data-transfers-cuda-cc/). 
 
 ### Execution flow for default(single) stream and non-default(mutiple) stream on Nvidia RTX 5070 Ti
 {% include image-gallery.html images="Asynchronous_transfer_4.png" height="400" %} 
