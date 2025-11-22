@@ -1,7 +1,7 @@
 ---
 layout: post
 title: How CUDA threads are grouped in a Warp.
-description: Number of clock cycles for loading data from Global memory to shared memory was used to identify group of threads in a Warp.
+description: Group of threads in a Warp was identified was measuring how many clock cycles for loading data from Global memory to Shared memory.
 skills: 
   - CUDA Programming.
   - C++/C Programming.
