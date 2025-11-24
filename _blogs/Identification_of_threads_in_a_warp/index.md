@@ -18,6 +18,7 @@ A CUDA warp is a group of 32 threads that executes the same instruction. Underst
 ## Warp in ID block
 
 
+
 ```cuda
 // A simple CUDA kernel.
 __global__  void threadsInWarp(threadProperties* threadsDev, int* globalData) {
@@ -45,7 +46,6 @@ __global__  void threadsInWarp(threadProperties* threadsDev, int* globalData) {
    threadsDev[gid].thread_x = threadIdx.x;   
    
 }
-
 ```
 
 ## Warp in 2D block
@@ -118,15 +118,9 @@ __global__  void threadsInWarp3D(threadProperties* threadsDev, int* globalData) 
    threadsDev[gid].thread_y = threadIdx.y;   
    threadsDev[gid].thread_z = threadIdx.z;   
 }
-
 ```
 
 ## Conclusion
-
-
-
-## Conclusion.
-
  
 ## References
 
