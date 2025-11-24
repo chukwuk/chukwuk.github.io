@@ -13,7 +13,21 @@ skills:
 ---
 ## Introduction  
 
-A CUDA warp is a group of 32 threads that executes the same instruction. Understanding how threads are grouped in a warp is important for warp tiling used in optimizing matrix mutiplication, which is a common computation in deep learning. In this technical blog, I will discuss how the 32 threads are grouped as a warp. This blog discussed grouping of threads in a warp. In this technical blog, I will be microbenchmarking NVIDIA RTX 5070 to identify the grouping of threads in a warp. This [paper](https://www.stuffedcow.net/files/gpuarch-ispass2010.pdf) has more information about GPU microbenchmarking.
+A CUDA warp is a group of 32 threads that executes the same instruction. Understanding how threads are grouped in a warp is important for warp tiling used in optimizing matrix mutiplication, which is a common computation in deep learning. In this technical blog, I will discuss how the 32 threads are grouped as a warp. This [blog]( https://siboehm.com/articles/22/CUDA-MMM) discussed grouping of threads in a warp. In this technical blog, I will be microbenchmarking NVIDIA RTX 5070 Ti to identify which group of threads belong to a warp. This [paper](https://www.stuffedcow.net/files/gpuarch-ispass2010.pdf) has more information about GPU microbenchmarking.
+
+## Microbenchmarking 
+
+CUDA programming model and NVIDIA hardware architecture never allows two different warps to access the shared memory simultaneously in a single clock cycle. Consequently, the number of clock cycles was measured for loading of data from the global memory(gmem) to shared memory(smem), since when one warp is accessing the shared memory, the other warp will be stalled and this will lead to different number of clock cycles for loading the data from the gmem to smem. The NVIDIA RTX 5070 ti has 128 cores per SM, so 128 blocksize was used to ensure the four warp can be executed in a single clock cycle, which will lead to stalling of the other three warps when loading data from gmem to smem. Threads in the same warp will have the same number of clock cycles for loading the data from gmem to smem, which is used to identify threads in the same warp. The struct below was used to collect information about the number of clock cycles, threadId.x, threadId.y and threadId.z each of thread. 
+
+```cuda
+struct threadProperties {
+    unsigned long long time;
+    int thread_x;
+    int thread_y;
+    int thread_z;
+    int value;
+};
+```
 
 ## Warp in ID block
 
