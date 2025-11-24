@@ -13,7 +13,7 @@ skills:
 ---
 ## Introduction  
 
-A CUDA warp is a group of 32 threads that executes the same instruction. Understanding how threads are grouped in a warp is important for warp tiling used in optimizing matrix mutiplication, which is a common computation in deep learning. In this technical blog, I will discuss how the 32 threads are grouped as a warp. This blog discussed grouping of threads in a warp. In this technical blog, I will be microbenchmarking NVIDIA RTX 5070 to identify the grouping of threads in a warp. This blog was motivated by this [paper](https://www.stuffedcow.net/files/gpuarch-ispass2010.pdf).
+A CUDA warp is a group of 32 threads that executes the same instruction. Understanding how threads are grouped in a warp is important for warp tiling used in optimizing matrix mutiplication, which is a common computation in deep learning. In this technical blog, I will discuss how the 32 threads are grouped as a warp. This blog discussed grouping of threads in a warp. In this technical blog, I will be microbenchmarking NVIDIA RTX 5070 to identify the grouping of threads in a warp. This [paper](https://www.stuffedcow.net/files/gpuarch-ispass2010.pdf) has moreinformation about GPU microbenchmarking.
 
 ## Warp in ID block
 
