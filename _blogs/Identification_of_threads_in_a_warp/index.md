@@ -365,6 +365,7 @@ __global__  void threadsInWarp2D(threadProperties* threadsDev, int* globalData) 
 
 ## Warp in 3D block
 
+In the 3D block, the blockDim.x is 8, blockDim.y is 8 and blockDim.z is 2.
 
 ```cuda
 __global__  void threadsInWarp3D(threadProperties* threadsDev, int* globalData) {
@@ -534,6 +535,8 @@ __global__  void threadsInWarp3D(threadProperties* threadsDev, int* globalData) 
 ```
 
 ## Conclusion
+
+In this blog, Microbenchmarking was used to show that threads are grouped in warp, based on consecutive threadId of the thread. 
  
 ## References
 
