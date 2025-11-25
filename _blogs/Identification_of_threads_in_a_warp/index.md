@@ -13,7 +13,11 @@ skills:
 ---
 ## Introduction  
 
-A CUDA warp is a group of 32 threads that executes the same instruction. Understanding how threads are grouped in a warp is important for warp tiling used in optimizing matrix mutiplication, which is a common computation in deep learning. In this technical blog, I will discuss how the 32 threads are grouped as a warp. This [blog]( https://siboehm.com/articles/22/CUDA-MMM) discussed grouping of threads in a warp. In this technical blog, I will be microbenchmarking NVIDIA RTX 5070 Ti to identify which group of threads belong to a warp. This [paper](https://www.stuffedcow.net/files/gpuarch-ispass2010.pdf) has more information about GPU microbenchmarking.
+A CUDA warp is a group of 32 threads that executes the same instruction. Understanding how threads are grouped in a warp is important for warp tiling used in optimizing matrix mutiplication, which is a common computation in deep learning. In this technical blog, I will discuss how microbenchmarking is used identify 32 threads that are grouped as a warp. According to this [blog]( https://siboehm.com/articles/22/CUDA-MMM), threads are grouped as a warp based on consecutive threadId. 
+```cuda
+threadId = threadId.x+ (blockDim.x * threadId.y) + (blockDim.x * blockDim.y * threadId.z)
+``` 
+In this technical blog, I will be microbenchmarking NVIDIA RTX 5070 Ti to identify which group of threads belong to a warp. This [paper](https://www.stuffedcow.net/files/gpuarch-ispass2010.pdf) has more information about GPU microbenchmarking.
 
 ## Microbenchmarking 
 
@@ -31,7 +35,7 @@ struct threadProperties {
 
 ## Warp in 1D block
 
-For 1D block, threadId.x = 0, threadId.x = 1 ..... threadId.x = 31 belong to the same warp, threadId.x = 32, threadId.x = 33 ..... threadId.x = 63 belong to the same warp, threadId.x = 64, threadId.x = 65 ..... threadId.x = 95 belong to the same warp. The microbenchmarking shows that threads in the same warp have the same number of clock cycle for loading data from gmem to smem. The code is available on [Github repo](https://github.com/chukwuk/Identification_of_threads_in_a_Warp).   
+For 1D block, Warp one has threadId.x ∈ {0,1,2...31, Warp two has threadId.x ∈ {32,33,34.....63}, Warp three has threadId.x ∈ {64,65,66....95}, Warp four has threadId.x ∈{95,96,97....127}. The microbenchmarking confirms the above grouping of threads in a warp, in which it shows that threads in the same warp have the same number of clock cycle for loading data from gmem to smem while threads in different warp have different number of clock cycles. The code is available on [Github repo](https://github.com/chukwuk/Identification_of_threads_in_a_Warp).   
 
 ```cuda
 // A simple CUDA kernel.
@@ -195,6 +199,7 @@ __global__  void threadsInWarp(threadProperties* threadsDev, int* globalData) {
 
 ## Warp in 2D block
 
+In the 2D block, the blockDim.x is 16, blockDim.y is 8 and blockDim.z is 1. Warp one has \(D=\{(threadId.x,threadId.y)\in \mathbb{Z}^{2}\mid 0\le x\le 15,0\le y\le 1\}\)  D={(x,y)∈Z2∣1≤x≤16,1≤y≤7 {threadId.x, threadId.y ∈ Z{0,1,2...16}, Warp two has threadId.x ∈ {32,33,34.....63},
 
 ```cuda
 __global__  void threadsInWarp2D(threadProperties* threadsDev, int* globalData) {
