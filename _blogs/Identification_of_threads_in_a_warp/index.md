@@ -199,7 +199,7 @@ __global__  void threadsInWarp(threadProperties* threadsDev, int* globalData) {
 
 ## Warp in 2D block
 
-In the 2D block, the blockDim.x is 16, blockDim.y is 8 and blockDim.z is 1. Warp one has $ℤ^2$ $\(D=\{(threadId.x,threadId.y)\in \mathbb{Z}^{2}\mid 0\le x\le 15,0\le y\le 1\}\)$, Warp two has threadId.x ∈ {32,33,34.....63},
+In the 2D block, the blockDim.x is 16, blockDim.y is 8 and blockDim.z is 1. Warp one has  ℤ<sup>2</sup> $ $\(D=\{(threadId.x,threadId.y)\in \mathbb{Z}^{2}\mid 0\le x\le 15,0\le y\le 1\}\)$, Warp two has threadId.x ∈ {32,33,34.....63},
 
 ```cuda
 __global__  void threadsInWarp2D(threadProperties* threadsDev, int* globalData) {
