@@ -199,7 +199,7 @@ __global__  void threadsInWarp(threadProperties* threadsDev, int* globalData) {
 
 ## Warp in 2D block
 
-In the 2D block, the blockDim.x is 16, blockDim.y is 8 and blockDim.z is 1. Warp one has group of threads = {(threadId.x,threadId.y) in ℤ<sup>2</sup>, 0 &le; threadId.x &le; 16,0 &le; threadId.y &le; 1}, Warp two has group of threads = {(threadId.x,threadId.y)\in ℤ<sup>2</sup>, 0 &le; threadId.x &le; 16,2 &le; threadId.y &le; 3}, Warp three has group of threads = {(threadId.x,threadId.y) in ℤ<sup>2</sup>, 0 &le; threadId.x &le; 16,4 &le; threadId.y &le; 5}, Warp four has group of threads = {(threadId.x,threadId.y) in ℤ<sup>2</sup>, 0 &le; threadId.x &le; 16,6 &le; threadId.y &le; 7}. The microbenchmarking confirms the above grouping of threads in a warp, in which it shows that threads in the same warp have the same number of clock cycle for loading data from gmem to smem while threads in different warp have different number of clock cycle. 
+In the 2D block, the blockDim.x is 16 and blockDim.y is 8. Warp one has group of threads = {(threadId.x, threadId.y) in ℤ<sup>2</sup>, 0 &le; threadId.x &le; 16, 0 &le; threadId.y &le; 1}, Warp two has group of threads = {(threadId.x, threadId.y) in ℤ<sup>2</sup>, 0 &le; threadId.x &le; 16, 2 &le; threadId.y &le; 3}, Warp three has group of threads = {(threadId.x, threadId.y) in ℤ<sup>2</sup>, 0 &le; threadId.x &le; 16, 4 &le; threadId.y &le; 5}, Warp four has group of threads = {(threadId.x, threadId.y) in ℤ<sup>2</sup>, 0 &le; threadId.x &le; 16, 6 &le; threadId.y &le; 7}. The microbenchmarking confirms the above grouping of threads in a warp, in which it shows that threads in the same warp have the same number of clock cycle for loading data from gmem to smem while threads in different warp have different number of clock cycle. 
 
 ```cuda
 __global__  void threadsInWarp2D(threadProperties* threadsDev, int* globalData) {
@@ -365,7 +365,8 @@ __global__  void threadsInWarp2D(threadProperties* threadsDev, int* globalData) 
 
 ## Warp in 3D block
 
-In the 3D block, the blockDim.x is 8, blockDim.y is 8 and blockDim.z is 2.
+In the 3D block, the blockDim.x is 8, blockDim.y is 8 and blockDim.z is 2. Warp one has group of threads = {(threadId.x, threadId.y, threadId.z) in ℤ<sup>2</sup>, 0 &le; threadId.x &le; 7, 0 &le; threadId.y &le; 3, threadId.z = 0}, Warp two has group of threads = {(threadId.x, threadId.y, threadId.z) in ℤ<sup>2</sup>, 0 &le; threadId.x &le; 7, 4 &le; threadId.y &le; 7, threadId.z = 0}, Warp three has group of threads = {(threadId.x, threadId.y, threadId.z) in ℤ<sup>2</sup>, 0 &le; threadId.x &le; 7, 0 &le; threadId.y &le; 3, threadId.z = 1}, Warp four has group of threads = {(threadId.x, threadId.y, threadId.z) in ℤ<sup>2</sup>, 0 &le; threadId.x &le; 8, 4 &le; threadId.y &le; 7, threadId.z = 1}. The microbenchmarking confirms the above grouping of threads in a warp, in which it shows that threads in the same warp have the same number of clock cycle for loading data from gmem to smem while threads in different warp have different number of clock cycle. 
+
 
 ```cuda
 __global__  void threadsInWarp3D(threadProperties* threadsDev, int* globalData) {
