@@ -20,8 +20,10 @@ Euclidean matrix distance is an nxn matrix representing the euclidean distance b
 
 The eucildean distance calculation between 2D cooordinate points involves two substraction, two multiplication, one addition and one sqrt. According to this [post](https://forums.developer.nvidia.com/t/performance-tweak-for-single-precision-square-root/173274), sqrt() function involves about four to five floating point operation. Therefore, one euclidean distance calculation between 2D coordinates points involves 9 floating point operation. For 20224 2D coordinate points, which is what was used in this optimization. 
 
-  1. Total FLOPS: 20224<sup>2</sup> * 9 FLOPS = 3.68GFLOPS.
-  2.   
+    1. Total FLOPS: 20224<sup>2</sup> * 9 FLOPS = 3.68GFLOPS.
+    2. Minimum total data to read: 20224 * 4B = 80,896B(81KB)
+    3. Total data to write: 20224<sup>2</sup> * 4B = 1.64GB
+   
    
 
 # Naive kernel implementation
