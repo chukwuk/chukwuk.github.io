@@ -24,7 +24,7 @@ The eucildean distance calculation between 2D cooordinate points involves two su
    2. Minimum total data to read: 20224 * 8B = 161792B(162KB)
    3. Total data to write: 20224<sup>2</sup> * 4B = 1.64GB
    
-The Nvidia RTX 5070 Ti has a memory bandwith of 896GB/sec and has a performance of 133TFLOPS. Therefore, the theoretical time for the calculation is 27.69 milliseconds while the theoretical time for read and writing the data is 5.48 milliseconds assuming the both total read and write is 4.91GB. This reason for the approximation is that each GPU thread of 20224 threads reads 162 KB from global memory wihout caching. This theoretical calculation shows that the euclidean distance matrix calculation is compute-bound.       
+The Nvidia RTX 5070 Ti has a memory bandwith of 896GB/sec and has a performance of 133TFLOPS. Therefore, the theoretical time for the calculation is 27.69 milliseconds while the theoretical total time for data read and write is 5.48 milliseconds assuming the both total read and write is 4.91GB. This reason for the approximation is that each GPU thread of 20224 threads reads 162 KB from global memory wihout caching. This theoretical calculation shows that the euclidean distance matrix calculation is compute-bound.       
 
 # Naive kernel implementation
  
