@@ -32,3 +32,4 @@ The Nvidia RTX 5070 Ti has a memory bandwith of 896GB/sec and has a fp32 compute
 ## References
 
 * [CUDA C++ Best Practices Guide](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/)
+* [SOL Analysis with NVIDIA Nsight Compute | CUDA Developer Tools](https://www.youtube.com/watch?v=uHN5fpfu8As)
