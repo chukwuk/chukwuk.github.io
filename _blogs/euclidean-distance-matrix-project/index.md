@@ -26,10 +26,16 @@ The eucildean distance calculation between 2D cooordinate points involves two su
    
 The Nvidia RTX 5070 Ti has a memory bandwith of 896GB/sec and has a fp32 compute throughput of 41TFLOPS. Therefore, the theoretical time for the calculation is 0.2 milliseconds while the theoretical total time for data read and write is 4.1 milliseconds assuming the both total read and write is 3.68GB. This simple theoretical calculation shows that the euclidean distance matrix calculation is memory-bound.       
 
-## Naive kernel implementation
+## Kernel 1: Naive implementation
+
+
+## Kernel 2: Global Memory Coalescing
  
+
+## Kernel 3: Shared Memory Cache-Blocking
 
 ## References
 
 * [CUDA C++ Best Practices Guide](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/)
 * [SOL Analysis with NVIDIA Nsight Compute](https://www.youtube.com/watch?v=uHN5fpfu8As)
+* [How to Optimize a CUDA Matmul Kernel for cuBLAS-like Performance: a Worklog](https://siboehm.com/articles/22/CUDA-MMM)
