@@ -28,6 +28,8 @@ The Nvidia RTX 5070 Ti has a memory bandwith of 896GB/sec and has a fp32 compute
 
 ## Kernel 1: Naive implementation
 
+The naive implementation involves each GPU thread computing the euclidean distance between one coordinate and every other coordinate, which means each GPU thread will compute n euclidean distance out of n x n euclidean distance matrix.    
+
 
 ## Kernel 2: Global Memory Coalescing
  
@@ -39,3 +41,4 @@ The Nvidia RTX 5070 Ti has a memory bandwith of 896GB/sec and has a fp32 compute
 * [CUDA C++ Best Practices Guide](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/)
 * [SOL Analysis with NVIDIA Nsight Compute](https://www.youtube.com/watch?v=uHN5fpfu8As)
 * [How to Optimize a CUDA Matmul Kernel for cuBLAS-like Performance: a Worklog](https://siboehm.com/articles/22/CUDA-MMM)
+* [Fast N-Body Simulation with CUDA](https://developer.nvidia.com/gpugems/gpugems3/part-v-physics-simulation/chapter-31-fast-n-body-simulation-cuda)
