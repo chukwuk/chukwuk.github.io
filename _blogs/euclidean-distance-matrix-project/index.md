@@ -28,7 +28,7 @@ The Nvidia RTX 5070 Ti has a memory bandwith of 896GB/sec and has a fp32 compute
 
 ## Kernel 1: Naive implementation
 
-The naive implementation involves each GPU thread computing the euclidean distance between one coordinate and every other coordinate, which means each GPU thread will compute n euclidean distance out of n x n euclidean distance matrix. In CUDA programming model, threads are execute by warp, which is a group of 32 threads that executes the same instruction simultaneously(Single Instruction Multiple Threads). The minimum memory transaction by a warp is 32 bytes, which means a warp need four memory transaction to write 32 float data type if the data are adjacent. For kernel 1, where none of the data is not aligned, a warp will need 32 memory transaction(1024bytes) to service the memory access, which leads to the waste of 992 bytes of memory bandwith per warp.
+The naive implementation involves each GPU thread computing the euclidean distance between one coordinate and every other coordinate, which means each GPU thread will compute n euclidean distance out of n x n euclidean distance matrix. In CUDA programming model, threads are execute by warp, which is a group of 32 threads that executes the same instruction simultaneously(Single Instruction Multiple Threads). The minimum memory transaction by a warp is 32 bytes, which means a warp need four memory transaction to write 32 float data type to global memory if the data are adjacent. For kernel 1, where the data written to global memory is not aligned(coalesced), a warp will need 32 memory transaction(1024bytes) to write 32 float data type to global memory, which leads to the waste of 992 bytes of memory bandwith per warp.
 
  
 ```cuda
