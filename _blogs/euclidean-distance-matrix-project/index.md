@@ -58,6 +58,7 @@ __global__  void euclideanMatrix(LocationPrim *cordinates, float* euclideanDista
 
 
 ```cuda
+// Kernel function with coalesced global memory write
 __global__  void euclideanMatrix(LocationPrim *cordinates, float* euclideanDistance, size_t NUMDATA) {
     
    size_t gid_start =  blockIdx.x * blockDim.x; 
@@ -89,7 +90,7 @@ __global__  void euclideanMatrix(LocationPrim *cordinates, float* euclideanDista
 ## Kernel 3: Shared Memory Cache-Blocking
 
 ```cuda
-
+// Kernel function with shared memory
 __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, float* euclideanDistance, size_t NUMDATA, int numDataPerThread) {
     
    size_t gid_start =  blockIdx.x *  blockDim.x;
