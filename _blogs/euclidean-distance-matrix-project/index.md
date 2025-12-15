@@ -28,12 +28,135 @@ The Nvidia RTX 5070 Ti has a memory bandwith of 896GB/sec and has a fp32 compute
 
 ## Kernel 1: Naive implementation
 
-The naive implementation involves each GPU thread computing the euclidean distance between one coordinate and every other coordinate, which means each GPU thread will compute n euclidean distance out of n x n euclidean distance matrix. In CUDA programming model, threads are execute by warp, which is a group of 32 threads that executes the same instruction simultaneously(Single Instruction Multiple Threads). The minimum memory transaction by a warp is 32 bytes, which means a warp need four memory transaction to write 32 float data type if the data are adjacent. In the case, where the data is not aligned, the warp will need 32 memory transaction(1024bytes) to service the memory access, which is a waste of 992 bytes. 
+The naive implementation involves each GPU thread computing the euclidean distance between one coordinate and every other coordinate, which means each GPU thread will compute n euclidean distance out of n x n euclidean distance matrix. In CUDA programming model, threads are execute by warp, which is a group of 32 threads that executes the same instruction simultaneously(Single Instruction Multiple Threads). The minimum memory transaction by a warp is 32 bytes, which means a warp need four memory transaction to write 32 float data type if the data are adjacent. For kernel 1, where none of the data is not aligned, a warp will need 32 memory transaction(1024bytes) to service the memory access, which leads to the waste of 992 bytes of memory bandwith per warp.
+
+ 
+```cuda
+// Naive kernel function
+
+__global__  void euclideanMatrix(LocationPrim *cordinates, float* euclideanDistance, size_t NUMDATA) {
+    
+   size_t gid =  blockIdx.x * blockDim.x + threadIdx.x;
+    
+    if (gid < NUMDATA) {
+    	size_t index = gid * NUMDATA;
+    	for (int i = 0; i < NUMDATA; i++)  {
+           float x_co =  (cordinates[gid].x - cordinates[i].x);
+           float y_co =  (cordinates[gid].y - cordinates[i].y);
+           float pow_xco = x_co * x_co;
+           float pow_yco = y_co * y_co;
+       	   float pow_plus = sqrt(pow_yco+pow_xco);
+           euclideanDistance[index+i] = pow_plus;
+         }
+    }
+    
+}
+```
+
 
 ## Kernel 2: Global Memory Coalescing
+
+
+```cuda
+__global__  void euclideanMatrix(LocationPrim *cordinates, float* euclideanDistance, size_t NUMDATA) {
+    
+   size_t gid_start =  blockIdx.x * blockDim.x; 
+   size_t blocksize =   blockDim.x*blockDim.y*blockDim.z;
+   size_t index;
+   size_t real_gid;
+   size_t k;
+   size_t j;
+   for (int i = threadIdx.x; i < NUMDATA*blocksize; i+=blocksize)  {
+       j = i / NUMDATA;
+       real_gid =  j + gid_start;
+       if (real_gid >= NUMDATA) {
+           continue;
+       }
+       k = i - (j * NUMDATA); 
+       index = real_gid * NUMDATA;	   
+       float x_co =  (cordinates[real_gid].x - cordinates[k].x);
+       float y_co =  (cordinates[real_gid].y - cordinates[k].y);
+       float pow_xco = x_co * x_co;
+       float pow_yco = y_co * y_co;
+       float pow_plus = sqrt(pow_yco+pow_xco);
+       euclideanDistance[index+k] = pow_plus;
+  }
+    
+}
+```
  
 
 ## Kernel 3: Shared Memory Cache-Blocking
+
+```cuda
+
+__global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, float* euclideanDistance, size_t NUMDATA, int numDataPerThread) {
+    
+   size_t gid_start =  blockIdx.x *  blockDim.x;
+   size_t gid =  blockIdx.x * blockDim.x + threadIdx.x;
+   extern  __shared__ LocationPrim locations [];
+   int blocksize = blockDim.x * blockDim.y * blockDim.z;          
+   size_t numofDataperBatch = (numDataPerThread) * blocksize;
+   auto numBatchToFetch = [&](int batchfetched) -> int {	   
+     return ((NUMDATA - batchfetched) >= numofDataperBatch) ? numofDataperBatch : (NUMDATA - batchfetched);
+   };
+      
+   size_t index;
+   size_t real_gid;
+   size_t t = 0;
+   size_t k;
+   size_t dataSub;
+   size_t ref_index;
+   size_t d; 
+   size_t dataFetchSize;  	  
+   size_t threadId = threadIdx.x;
+   size_t totalDataCompute; 
+   if (gid < NUMDATA) {
+       locations[numofDataperBatch + threadId] = cordinates[gid];    
+ 
+   } 
+    
+   for (int i = 0; i < NUMDATA; i+=numBatchToFetch(i)) {
+
+       dataFetchSize = numBatchToFetch(i);  	  
+       for (size_t n = threadId, m = i + threadId; n < dataFetchSize; n+=blocksize, m+= blocksize) {
+           //locations[n] = cordinates[m];
+	   __pipeline_memcpy_async(&locations[n], &cordinates[m], sizeof(LocationPrim));
+       } 
+       __pipeline_commit();
+       __pipeline_wait_prior(0);
+       __syncthreads();
+       
+       t = 0;
+       totalDataCompute = dataFetchSize*blocksize;       
+       //count = threadIdx.x;
+       for (size_t z = threadId, c = i + threadId; z < totalDataCompute; z+=blocksize, c+=blocksize)  {
+           
+	  t  = z/dataFetchSize;
+          
+          real_gid =  t + gid_start;
+	   
+          if (real_gid >= NUMDATA) {
+            continue;
+          }
+	  dataSub = t * dataFetchSize;
+          k = c - dataSub; 
+          index = real_gid*NUMDATA;
+          d = z - dataSub;
+	  ref_index = numofDataperBatch + t;  
+          float x_co =  (locations[ref_index].x - locations[d].x);
+          float y_co =  (locations[ref_index].y - locations[d].y);
+	  float pow_xco = x_co * x_co;
+          float pow_yco = y_co * y_co;
+          float pow_plus = sqrt(pow_yco+pow_xco);
+          euclideanDistance[index+k] = pow_plus;
+       }  
+      __syncthreads();
+	 
+      } 
+}
+```
+
 
 ## References
 
