@@ -132,22 +132,19 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
        totalDataCompute = dataFetchSize*blocksize;       
        //count = threadIdx.x;
        for (size_t z = threadId, c = i + threadId; z < totalDataCompute; z+=blocksize, c+=blocksize)  {
-           
-	  t  = z/dataFetchSize;
-          
+          t  = z/dataFetchSize;   
           real_gid =  t + gid_start;
-	   
           if (real_gid >= NUMDATA) {
             continue;
           }
-	  dataSub = t * dataFetchSize;
+	      dataSub = t * dataFetchSize;
           k = c - dataSub; 
           index = real_gid*NUMDATA;
           d = z - dataSub;
-	  ref_index = numofDataperBatch + t;  
+	      ref_index = numofDataperBatch + t;  
           float x_co =  (locations[ref_index].x - locations[d].x);
           float y_co =  (locations[ref_index].y - locations[d].y);
-	  float pow_xco = x_co * x_co;
+	      float pow_xco = x_co * x_co;
           float pow_yco = y_co * y_co;
           float pow_plus = sqrt(pow_yco+pow_xco);
           euclideanDistance[index+k] = pow_plus;
