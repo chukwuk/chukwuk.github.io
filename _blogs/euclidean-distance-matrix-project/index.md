@@ -161,22 +161,15 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
 ```cuda
 // Kernel function with instruction optimization
 
-__device__ size_t divFast (size_t t, size_t dataFetchSize, size_t z)
-  {
-   while (z >= ((t + 1) * dataFetchSize)) {
-        t = t + 1;
-   }
-   return t;
- }
-
 __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, float* euclideanDistance, size_t NUMDATA, int numDataPerThread) {
-   size_t gid_start = (size_t) blockIdx.x * (size_t) blockDim.x;
-   size_t gid = (size_t) blockIdx.x * (size_t) blockDim.x + threadIdx.x;
+   size_t gid_start =  blockIdx.x * blockDim.x;
+   size_t gid =  blockIdx.x * blockDim.x + threadIdx.x;
    extern  __shared__ LocationPrim locations [];
    int blocksize = blockDim.x * blockDim.y * blockDim.z;      
    size_t numofDataperBatch = (numDataPerThread) * blocksize;
+   size_t numRef = ((numDataPerThread+1) * blocksize);
    auto numBatchToFetch = [&](int batchfetched) -> int {	   
-     return ((NUMDATA - batchfetched) >= numofDataperBatch) ? numofDataperBatch : (NUMDATA - batchfetched);
+     return ((NUMDATA - batchfetched) >= (numofDataperBatch + blocksize)) ? numofDataperBatch : (NUMDATA - batchfetched);
    };
    size_t index;
    size_t real_gid;
@@ -187,9 +180,9 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
    size_t d; 
    size_t dataFetchSize;  	  
    size_t threadId = threadIdx.x;
-   size_t totalDataCompute; 
+   size_t totalDataCompute;
    if (gid < NUMDATA) {
-       locations[numofDataperBatch + threadId] = cordinates[gid];    
+       locations[numRef + threadId] = cordinates[gid];    
    } 
    for (int i = 0; i < NUMDATA; i+=numBatchToFetch(i)) {
        dataFetchSize = numBatchToFetch(i);  	  
@@ -201,9 +194,11 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
         __pipeline_wait_prior(0);
         __syncthreads();
        t = 0;
-       totalDataCompute = dataFetchSize*blocksize;       
+       totalDataCompute = dataFetchSize*blocksize;
        for (size_t z = threadId, c = i + threadId; z < totalDataCompute; z+=blocksize, c+=blocksize)  {
-	  t = divFast (t, dataFetchSize, z);
+          if (z >= ((t + 1) * dataFetchSize)) {
+               t = t + 1;
+          } 
           real_gid =  t + gid_start; 
           if (real_gid >= NUMDATA) {
             continue;
@@ -212,7 +207,7 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
           k = c - dataSub; 
           index = real_gid*NUMDATA;
           d = z - dataSub;
-	  ref_index = numofDataperBatch + t;  
+	  ref_index = numRef + t;  
           float x_co =  (locations[ref_index].x - locations[d].x);
           float y_co =  (locations[ref_index].y - locations[d].y);
 	  float pow_xco = x_co * x_co;
