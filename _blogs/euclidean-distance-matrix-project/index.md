@@ -56,6 +56,9 @@ __global__  void euclideanMatrix(LocationPrim *cordinates, float* euclideanDista
 ### Nsight compute Speed of light analysis for Kernel 1.
 {% include image-gallery.html images="kernel_one_SOP_analysis.jpg" height="400" %} 
 
+### Nsight compute memory analysis for Kernel 1.
+{% include image-gallery.html images="kernel_one_memory_analysis.jpg" height="400" %} 
+{% include image-gallery.html images="kernel_one_memory_throughput.jpg" height="400" %} 
 
 <br>
 ## Kernel 2: Global Memory Coalescing
