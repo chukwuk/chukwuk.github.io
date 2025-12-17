@@ -57,7 +57,7 @@ __global__  void euclideanMatrix(LocationPrim *cordinates, float* euclideanDista
 {% include image-gallery.html images="kernel_one_SOP_analysis.jpg" height="400" %} 
 
 
-
+<br>
 ## Kernel 2: Global Memory Coalescing
 
 The kernel 2 function involves each warp writing the results of the euclidean distance calculations to 32 adjacent float data memory (4 adjacent sectors), which means all warps in a block writes the results of the calculations to 256 adjacent float data memory (32 adjacent sector for a blocksize of 256).
