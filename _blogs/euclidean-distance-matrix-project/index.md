@@ -54,7 +54,7 @@ __global__  void euclideanMatrix(LocationPrim *cordinates, float* euclideanDista
 ```
 
 ### Nsight compute Speed of light analysis for Kernel 1.
-{% include image-gallery.html images="kernel_one_SOP_analysis.png" height="400" %} 
+{% include image-gallery.html images="kernel_one_SOP_analysis.jpg" height="400" %} 
 
 
 
