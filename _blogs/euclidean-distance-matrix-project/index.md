@@ -28,7 +28,7 @@ The Nvidia RTX 5070 Ti has a memory bandwith of 896GB/sec and has a fp32 compute
 
 ## Kernel 1: Naive implementation
 
-The naive implementation involves each GPU thread computing the euclidean distance between one coordinate and every other coordinate, which means each GPU thread will compute n euclidean distance out of n x n euclidean distance matrix. Therefore, each block of thread compute (n * blocksize) euclidean distance. In CUDA programming model, threads are execute by warp, which is a group of 32 threads that executes the same instruction simultaneously(Single Instruction Multiple Threads). The minimum memory transaction by a warp is 32 bytes adjacent data (also known sector), which means a warp need four memory transaction to write 32 float data type to global memory if the data are adjacent. For kernel 1, where the data written to global memory are not adjacent(coalesced), a warp will need 32 memory transaction(1024bytes) to write 32 float data type to global memory, which leads to the waste of 992 bytes of memory bandwith per warp.
+The naive implementation involves each GPU thread computing the euclidean distance between one coordinate and every other coordinate, which means each GPU thread will compute n euclidean distance out of n x n euclidean distance matrix. Therefore, each block of thread compute (n * blocksize) euclidean distance. In CUDA programming model, threads are execute by warp, which is a group of 32 threads that executes the same instruction simultaneously(Single Instruction Multiple Threads). The minimum memory transaction by a warp is 32 bytes adjacent data (also known sector), which means a warp need four memory transaction to write 32 float data type to global memory if the data are adjacent. For kernel 1, where the data written to global memory are not adjacent(coalesced), a warp will need 32 memory transaction(1024bytes) to write 32 float data type to global memory, which leads to the waste of 992 bytes of memory bandwith per warp. The kernel 1 function has a compute throughput and memory throughput of 475 GFLOPS and 233 GB/s based on nsight compute.   
 
  
 ```cuda
@@ -56,7 +56,8 @@ __global__  void euclideanMatrix(LocationPrim *cordinates, float* euclideanDista
 
 ## Kernel 2: Global Memory Coalescing
 
-The kernel 2 function involves each warp writing the results of the euclidean distance calculations to 32 adjacent float data memory (4 adjacent sectors), which means all warps in a block writes the results of the calculations to 256 adjacent float data memory (32 adjacent sector).    
+The kernel 2 function involves each warp writing the results of the euclidean distance calculations to 32 adjacent float data memory (4 adjacent sectors), which means all warps in a block writes the results of the calculations to 256 adjacent float data memory (32 adjacent sector for a blocksize of 256).
+    
 ```cuda
 // Kernel function with coalesced global memory write
 __global__  void euclideanMatrix(LocationPrim *cordinates, float* euclideanDistance, size_t NUMDATA) {
