@@ -73,12 +73,12 @@ The kernel 2 function involves each warp writing the results of the euclidean di
 __global__  void euclideanMatrix(LocationPrim *cordinates, float* euclideanDistance, size_t NUMDATA) {
     
    size_t gid_start =  blockIdx.x * blockDim.x; 
-   size_t blocksize =   blockDim.x*blockDim.y*blockDim.z;
+   size_t blocksize =  blockDim.x * blockDim.y * blockDim.z;
    size_t index;
    size_t real_gid;
    size_t k;
    size_t j;
-   for (int i = threadIdx.x; i < NUMDATA*blocksize; i+=blocksize)  {
+   for (int i = threadIdx.x; i < NUMDATA * blocksize; i+=blocksize)  {
        j = i / NUMDATA;
        real_gid =  j + gid_start;
        if (real_gid >= NUMDATA) {
@@ -132,8 +132,7 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
 
        dataFetchSize = numBatchToFetch(i);  	  
        for (size_t n = threadId, m = i + threadId; n < dataFetchSize; n+=blocksize, m+= blocksize) {
-           //locations[n] = cordinates[m];
-	   __pipeline_memcpy_async(&locations[n], &cordinates[m], sizeof(LocationPrim));
+	     __pipeline_memcpy_async(&locations[n], &cordinates[m], sizeof(LocationPrim));
        } 
        __pipeline_commit();
        __pipeline_wait_prior(0);
@@ -198,14 +197,13 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
    for (int i = 0; i < NUMDATA; i+=numBatchToFetch(i)) {
        dataFetchSize = numBatchToFetch(i);  	  
        for (size_t n = threadId, m = i + threadId; n < dataFetchSize; n+=blocksize, m+= blocksize) {
-           //locations[n] = cordinates[m];
-	   __pipeline_memcpy_async(&locations[n], &cordinates[m], sizeof(LocationPrim));
+	      __pipeline_memcpy_async(&locations[n], &cordinates[m], sizeof(LocationPrim));
        } 
         __pipeline_commit();
         __pipeline_wait_prior(0);
         __syncthreads();
        t = 0;
-       totalDataCompute = dataFetchSize*blocksize;
+       totalDataCompute = dataFetchSize * blocksize;
        for (size_t z = threadId, c = i + threadId; z < totalDataCompute; z+=blocksize, c+=blocksize)  {
           if (z >= ((t + 1) * dataFetchSize)) {
                t = t + 1;
@@ -216,7 +214,7 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
           }
 	  dataSub = t * dataFetchSize;
           k = c - dataSub; 
-          index = real_gid*NUMDATA;
+          index = real_gid * NUMDATA;
           d = z - dataSub;
 	  ref_index = numRef + t;  
           float x_co =  (locations[ref_index].x - locations[d].x);
