@@ -33,7 +33,7 @@ The naive implementation involves each GPU thread computing the euclidean distan
 
 ### Storage of n x n euclidean distance matrix in GPU memory.
 {% include image-gallery.html images="Row_major_storage_GPU_3.png" height="400" %} 
- 
+<br> 
 ```cuda
 // Naive kernel function
 
