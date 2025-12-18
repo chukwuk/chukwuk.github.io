@@ -140,7 +140,6 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
        
        t = 0;
        totalDataCompute = dataFetchSize*blocksize;       
-       //count = threadIdx.x;
        for (size_t z = threadId, c = i + threadId; z < totalDataCompute; z+=blocksize, c+=blocksize)  {
           t  = z/dataFetchSize;   
           real_gid =  t + gid_start;
