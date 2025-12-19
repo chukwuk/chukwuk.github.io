@@ -66,12 +66,12 @@ __global__  void euclideanMatrix(LocationPrim *cordinates, float* euclideanDista
 <br>
 ## Kernel 2: Global Memory Coalescing
 
-The kernel 2 function involves each warp writing the results of the euclidean distance calculations to 32 adjacent float data memory (4 adjacent sectors), which means all warps in a block writes the results of the calculations to 256 adjacent float data memory (32 adjacent sector for a blocksize of 256).
+The kernel 2 function involves each warp writing the results of the euclidean distance calculations to 32 adjacent float data memory (4 adjacent sectors), which means all warps in a block writes the results of the calculations to 256 adjacent float data memory (32 adjacent sector for a blocksize of 256). The kernel 2 function has a compute throughput and memory throughput of 993 GFLOPS and 359 GB/s based on nsight compute analysis. 
 
 ### Non coalesced vs coalesced Global memory write.
 {% include image-gallery.html images="Non_Coalesced_global_memory_write.png" height="400" %} 
 {% include image-gallery.html images="Coalesced_global_memory_write.png" height="400" %} 
-
+<br>
 
 ```cuda
 // Kernel function with coalesced global memory write
@@ -102,8 +102,16 @@ __global__  void euclideanMatrix(LocationPrim *cordinates, float* euclideanDista
 }
 ```
  
+### Nsight compute Speed of light analysis for Kernel 2.
+{% include image-gallery.html images="kernel_two_SOP_analysis.jpg" height="400" %} 
+
+### Nsight compute memory analysis for Kernel 2.
+{% include image-gallery.html images="kernel_two_memory_analysis.jpg" height="400" %} 
+<br>
 
 ## Kernel 3: Shared Memory Cache-Blocking
+
+The kernel 3 function has a compute throughput and memory throughput of 1520 GFLOPS and 516 GB/s based on nsight compute analysis. 
 
 ```cuda
 // Kernel function with shared memory
@@ -169,8 +177,18 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
 }
 ```
 
+### Nsight compute Speed of light analysis for Kernel 3.
+{% include image-gallery.html images="kernel_three_SOP_analysis_2.jpg" height="400" %} 
+
+### Nsight compute memory analysis for Kernel 3.
+{% include image-gallery.html images="kernel_three_memory_analysis_2.jpg" height="400" %} 
+<br>
+
+
 
 ## Kernel 4: Instruction Optimization
+
+The kernel 4 function has a compute throughput and memory throughput of 1881 GFLOPS and 681 GB/s based on nsight compute analysis. 
 
 ```cuda
 // Kernel function with instruction optimization
@@ -232,6 +250,12 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
    }
 }
 ```
+### Nsight compute Speed of light analysis for Kernel 4.
+{% include image-gallery.html images="kernel_four_SOP_analysis_2.jpg" height="400" %} 
+
+### Nsight compute memory analysis for Kernel 4.
+{% include image-gallery.html images="kernel_four_memory_analysis_2.jpg" height="400" %} 
+<br>
 
  
 
