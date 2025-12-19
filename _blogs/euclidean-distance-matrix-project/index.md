@@ -66,7 +66,7 @@ __global__  void euclideanMatrix(LocationPrim *cordinates, float* euclideanDista
 <br>
 ## Kernel 2: Global Memory Coalescing
 
-The kernel 2 function involves each warp writing the results of the euclidean distance calculations to 32 adjacent float data memory (4 adjacent sectors), which means all warps in a block writes the results of the calculations to 256 adjacent float data memory (32 adjacent sector for a blocksize of 256). The for loop condition in each thread was increased from NUMDATA to NUMDATA * blocksize, however the for loop was updated by blocksize. This allows adjacent threads to do calculations that is written to adjacent float data memory. Consequently, kernel 2 function has a compute throughput and memory throughput of 993 GFLOPS and 359 GB/s, which is about 50 percent higher than that of kernel 1 function.  
+The kernel 2 function involves each warp writing the results of the euclidean distance calculations to 32 adjacent float data memory (4 adjacent sectors), which means all warps in a block writes the results of the calculations to 256 adjacent float data memory (32 adjacent sector for a blocksize of 256). The for loop condition in each thread was increased from NUMDATA to NUMDATA * blocksize, however the for loop was updated by blocksize. This allows adjacent threads to compute results that are written to adjacent float data memory. Consequently, kernel 2 function has a compute throughput and memory throughput of 993 GFLOPS and 359 GB/s, which is about 50 percent higher than that of kernel 1 function.  
 
 ### Non coalesced vs coalesced Global memory write.
 {% include image-gallery.html images="Non_Coalesced_global_memory_write.png" height="400" %} 
