@@ -188,7 +188,7 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
 
 ## Kernel 4: Instruction Optimization
 
-The kernel 4 function has a compute throughput and memory throughput of 1881 GFLOPS and 681 GB/s based on nsight compute analysis. 
+The integer division takes significantly more clock cycle than integer multiplication, addition and subtraction. According to [CUDA C++ Best Practices Guide](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/), integer addition takes one clock cycle and integer multiplication takes 2 clock cycle. Additionally, integer compare takes one clock cycle too. The integer divison was replaced with integer addition, multiplication and compare, which increased the compute and memory throughput to 1881 GFLOPS and 681 GB/s  based on nsight compute analysis. Additionally, the memory bandwith boundary meets the peak performance boundary.    
 
 ```cuda
 // Kernel function with instruction optimization
@@ -257,7 +257,9 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
 {% include image-gallery.html images="kernel_four_memory_analysis_2.jpg" height="400" %} 
 <br>
 
- 
+## Conclusion
+
+This technical blog discussed step by step on how to optimize kernel function for euclidean distance matrix calculation for 2D coordinate points.   
 
 ## References
 
