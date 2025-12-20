@@ -111,7 +111,7 @@ __global__  void euclideanMatrix(LocationPrim *cordinates, float* euclideanDista
 
 ## Kernel 3: Shared Memory Cache-Blocking
 
-The kernel 3 function has a compute throughput and memory throughput of 1520 GFLOPS and 516 GB/s based on nsight compute analysis. 
+Shared memory is an on-chip memory has 100x lower latency and higher memory bandwith than uncached global memory (provided there is no bank conflict). The shared memory is used to avoid redundant transfer from global memory by different threads in a block. Shared memory also enable cooperation between threads in a block. Each thread in a block loads a chunk of the 2D coardinates points data in shared memory, after that each threads in a block uses all the data loaded in the shared memory to compute the euclidean distance. The use of shared memory increased compute throughput and memory throughput to 1520 GFLOPS and 516 GB/s based on nsight compute analysis. Additionally, the number of bytes utilized by each thread for global load increased from 14.7 bytes per sector(32 bytes) to 31.7 per sector(32 bytes). The number of bytes utilized by each thread is 31.7 bytes instead of 32 bytes because the reference 2D coordinates point data is loaded two times into shared memory.    
 
 ```cuda
 // Kernel function with shared memory
