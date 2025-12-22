@@ -45,7 +45,7 @@ __global__  void threadsInWarp(threadProperties* threadsDev, int* globalData) {
    __shared__ int readtimer [128];
    size_t gid = blockIdx.x *  blockDim.x +  threadIdx.x;
    
-   float copyvalue; 
+   int copyvalue; 
    unsigned long long startTime = clock();  
    readtimer[threadIdx.x] = globalData[threadIdx.x];
     
@@ -211,7 +211,7 @@ __global__  void threadsInWarp2D(threadProperties* threadsDev, int* globalData) 
  
 
 
-   float copyvalue; 
+   int copyvalue; 
    unsigned long long startTime = clock();  
    readtimer[gid] = globalData[gid];
     
@@ -382,7 +382,7 @@ __global__  void threadsInWarp3D(threadProperties* threadsDev, int* globalData) 
     (threadIdx.x * blockDim.y) + threadIdx.y;
 
 
-   float copyvalue; 
+   int copyvalue; 
    unsigned long long startTime = clock();  
    readtimer[gid] = globalData[gid];
     
