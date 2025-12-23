@@ -264,7 +264,7 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
 
 ## Conclusion
 
-This technical blog discussed step by step on how to optimize kernel function for euclidean distance matrix calculation for 2D coordinate points. There are more optimization opportunites by removing duplicate calculations.    
+This technical blog discussed step by step on how to optimize kernel function for euclidean distance matrix calculation for 2D coordinate points. There are more optimization opportunites by removing duplicate calculations, which I will discuss later in this blog or in a different blog.     
 
 ## References
 
