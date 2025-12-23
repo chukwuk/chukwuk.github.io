@@ -14,7 +14,7 @@ skills:
 ---
 ## Introduction
 
-Euclidean matrix distance is an nxn matrix representing the euclidean distance between set of n points in Euclidean space. Euclidean distance matrix has so many application in machine learning, Engineering and robotics and image processing. This technical blog will discuss step by step on how to optimize CUDA kernel for Euclidean Distance Matrix for 2D coordinate points. The equation for calculating the euclidean distance distance between {x<sub>1</sub>, y<sub>1</sub>} and {x<sub>2</sub>, y<sub>2</sub>} is $`\sqrt{3x-1}`$ 
+Euclidean matrix distance is an nxn matrix representing the euclidean distance between set of n points in Euclidean space. Euclidean distance matrix has so many application in machine learning, Engineering and robotics and image processing. This technical blog will discuss step by step on how to optimize CUDA kernel for Euclidean Distance Matrix for 2D coordinate points. The equation for calculating the euclidean distance distance between {x<sub>1</sub>, y<sub>1</sub>} and {x<sub>2</sub>, y<sub>2</sub>} is $`\sqrt{3x-1}\`$ 
 
 ## Memory bound vs Compute bound for Euclidean distance Matrix
 
