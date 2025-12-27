@@ -317,11 +317,11 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
    size_t current_compute_stage;
    size_t nextBatchNum;
    for (int i = firstBatchNum; i < NUMDATA; i+=numBatchToFetch(i)) {
-     nextBatchNum = numBatchToFetch(i);
-     //Collectively acquire the pipeline head stage from all producer threads:
-     pipeline.producer_acquire();
-     cuda::memcpy_async(block, locations + shared_offset[copy_stage_idx], cordinates + i, sizeof(LocationPrim) * nextBatchNum,  pipeline);
-     pipeline.producer_commit();
+    nextBatchNum = numBatchToFetch(i);
+    //Collectively acquire the pipeline head stage from all producer threads:
+    pipeline.producer_acquire();
+    cuda::memcpy_async(block, locations + shared_offset[copy_stage_idx], cordinates + i, sizeof(LocationPrim) * nextBatchNum,  pipeline);
+    pipeline.producer_commit();
 
     // Collectively wait for the operations commited to the
     // previous `compute` stage to complete:
