@@ -262,8 +262,9 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
 
 ## Kernel 5: Multi-Stage Asynchronous Data Copies using cuda::pipeline 
 
+cuda::pipeline is a CUDA feature that allows overlap of computation with data movement. For kernel 5, the data movement from the global to shared memory was overlapped with the computation. However, this reduced compute and memory throughput to 1690GFLOPS and 612GB/s based on compute analysis. Additionally, the nsight compute analysis shows that the L2 local load access pattern and DRAM local store access pattern is not optimal, which means some local variable spill into L2 cache and DRAM.    
+ 
 ```cuda
-
 __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, float* euclideanDistance, size_t NUMDATA, int numDataPerThread) {
     
    size_t gid_start = blockIdx.x *  blockDim.x;
@@ -397,10 +398,18 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
   
 }
 
+### Nsight compute Speed of light analysis for Kernel 5.
+{% include image-gallery.html images="kernel_five_SOP_analysis.jpg" height="400" %} 
+
+### Nsight compute memory analysis for Kernel 5.
+{% include image-gallery.html images="kernel_five_memory_analysis.jpg" height="400" %} 
+<br>
 
 ```
 
 ## Kernel 6: Multi-Stage Asynchronous Data Copies using cuda::pipeline (optimize L2 and Global local access)
+
+The unoptimal L2 local load access pattern and DRAM local store access pattern was rectified by removing the dynamic indexing from the shared_offset array. The Dynamic indexing forces the cuda compiler to use local memory (that is slower than register) because the compiler does not which element will be accessed until runtime and the compiler cannot assign a register for an unknown element. The register pressure was also reduced by load the reference 2D coordinate data points from the global memory directly to shared memory. This slightly increased kernel 5 compute and memory throughput to 1698GFLOPS and 615GB/s, which are still lower than that of kernel 4. Probably, there was no performance improvement from asynchronous data copies because the 2D coordinate data points is small.      
 
 ```cuda
 __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, float* euclideanDistance, size_t NUMDATA, int numDataPerThread) {
@@ -420,8 +429,6 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
    auto numBatchToFetch = [&](int batchfetched) -> int {	   
      return ((NUMDATA - batchfetched) >= (numofDataperHalfBatch + blocksize)) ? numofDataperHalfBatch : (NUMDATA - batchfetched);
    };
-
-   //size_t shared_offset[stages_count] = {0, numofDataperHalfBatch}; // Offsets to each batch
    size_t current_compute_stage = 0;
    size_t current_copy_stage = 0;
    // Allocate shared storage for a two-stage cuda::pipeline:
@@ -429,10 +436,8 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
    auto pipeline = cuda::make_pipeline(block, &shared_state);
    size_t firstBatchNum =  numBatchToFetch(0);
    size_t threadId = threadIdx.x;
-   if (gid < NUMDATA) {
-       
+   if (gid < NUMDATA) {    
        __pipeline_memcpy_async(&locations[numRef + threadId], &cordinates[gid], sizeof(LocationPrim));
-       //locations[numRef + threadId] = cordinates[gid];    
    } 
    __pipeline_commit();
    __pipeline_wait_prior(0); 
@@ -506,7 +511,6 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
       // Compute the data fetch by the last iteration
        pipeline.consumer_wait(); 
        t = 0;
-       //current_compute_stage = shared_offset[compute_stage_idx];  
        totalDataCompute = current_compute_stage + dataFetchSize*blocksize; 
        for (size_t z = current_compute_stage + threadId, c = global_i + threadId; z < totalDataCompute; z+=blocksize, c+=blocksize)  {
               
@@ -524,22 +528,28 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
 	  ref_index = numRef + t;  
           float x_co = (locations[ref_index].x - locations[d].x);
           float y_co = (locations[ref_index].y - locations[d].y); 
-	  float pow_xco = x_co * x_co;
+	      float pow_xco = x_co * x_co;
           float pow_yco = y_co * y_co;
           float pow_plus = sqrt(pow_yco+pow_xco);
           euclideanDistance[index+k] = pow_plus;
        }
       __syncthreads();
-      //compute(global_out + block_batch(batch_sz-1), shared + shared_offset[(batch_sz - 1) % 2]);
       pipeline.consumer_release();
   
 }
 ```
  
+### Nsight compute Speed of light analysis for Kernel 6.
+{% include image-gallery.html images="kernel_six_SOP_analysis.jpg" height="400" %} 
+
+### Nsight compute memory analysis for Kernel 6.
+{% include image-gallery.html images="kernel_six_memory_analysis.jpg" height="400" %} 
+<br>
+
 
 ## Conclusion
 
-This technical blog discussed step by step on how to optimize kernel function for euclidean distance matrix calculation for 2D coordinate points. There are more optimization opportunites by removing duplicate calculations and shared memory bank conflict(due to a struct of 8 bytes), which I will discuss later in this blog or in a different blog. All my code are available on [Github](https://github.com/chukwuk/Optimized_GPU_version_for_euclidean_matrix/tree/master).
+This technical blog discussed step by step on how to optimize kernel function for euclidean distance matrix calculation for 2D coordinate points, which kernel 4 has the best compute and memory throughput. There are more optimization opportunites by removing duplicate calculations and shared memory bank conflict(due to a struct of 8 bytes), which I will discuss later in this blog or in a different blog. All my code are available on [Github](https://github.com/chukwuk/Optimized_GPU_version_for_euclidean_matrix/tree/master).
 
 ## References
 
