@@ -316,21 +316,21 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
    size_t current_compute_stage;
    size_t nextBatchNum;
    for (int i = firstBatchNum; i < NUMDATA; i+=numBatchToFetch(i)) {
-       nextBatchNum = numBatchToFetch(i);
-      //Collectively acquire the pipeline head stage from all producer threads:
-        pipeline.producer_acquire();
-        cuda::memcpy_async(block, locations + shared_offset[copy_stage_idx], cordinates + i, sizeof(LocationPrim) * nextBatchNum,  pipeline);
-        pipeline.producer_commit();
+     nextBatchNum = numBatchToFetch(i);
+     //Collectively acquire the pipeline head stage from all producer threads:
+     pipeline.producer_acquire();
+     cuda::memcpy_async(block, locations + shared_offset[copy_stage_idx], cordinates + i, sizeof(LocationPrim) * nextBatchNum,  pipeline);
+     pipeline.producer_commit();
 
-       // Collectively wait for the operations commited to the
-       // previous `compute` stage to complete:
-       pipeline.consumer_wait();
-       __syncthreads();
+    // Collectively wait for the operations commited to the
+    // previous `compute` stage to complete:
+    pipeline.consumer_wait();
+    __syncthreads();
               
-       t = 0;
-       current_compute_stage = shared_offset[compute_stage_idx];  
-       totalDataCompute = current_compute_stage + dataFetchSize*blocksize; 
-       for (size_t z = current_compute_stage + threadId, c = global_i + threadId; z < totalDataCompute; z+=blocksize, c+=blocksize)  {
+    t = 0;
+    current_compute_stage = shared_offset[compute_stage_idx];  
+    totalDataCompute = current_compute_stage + dataFetchSize*blocksize; 
+    for (size_t z = current_compute_stage + threadId, c = global_i + threadId; z < totalDataCompute; z+=blocksize, c+=blocksize)  {
                
 	  if (z >= (current_compute_stage + (t + 1) * dataFetchSize)) {
              t = t + 1;
@@ -341,14 +341,14 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
           if (real_gid >= NUMDATA) {
             continue;
           }
-	  dataSub = t * dataFetchSize;
+	      dataSub = t * dataFetchSize;
           k = c - dataSub; 
           index = real_gid*NUMDATA;
           d = z - dataSub;
-	  ref_index = numRef + t;  
+	      ref_index = numRef + t;  
           float x_co = (locations[ref_index].x - locations[d].x);
           float y_co = (locations[ref_index].y - locations[d].y); 
-	  float pow_xco = x_co * x_co;
+	      float pow_xco = x_co * x_co;
           float pow_yco = y_co * y_co;
           float pow_plus = sqrt(pow_yco+pow_xco);
           euclideanDistance[index+k] = pow_plus;
@@ -364,14 +364,12 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
       pipeline.consumer_release();
 	 
     }
-
-      
-      // Compute the data fetch by the last iteration
-       pipeline.consumer_wait(); 
-       t = 0;
-       current_compute_stage = shared_offset[compute_stage_idx];  
-       totalDataCompute = current_compute_stage + dataFetchSize*blocksize; 
-       for (size_t z = current_compute_stage + threadId, c = global_i + threadId; z < totalDataCompute; z+=blocksize, c+=blocksize)  {
+    // Compute the data fetch by the last iteration
+    pipeline.consumer_wait(); 
+    t = 0;
+    current_compute_stage = shared_offset[compute_stage_idx];  
+    totalDataCompute = current_compute_stage + dataFetchSize*blocksize; 
+    for (size_t z = current_compute_stage + threadId, c = global_i + threadId; z < totalDataCompute; z+=blocksize, c+=blocksize)  {
               
 	  if (z >= (current_compute_stage + (t + 1) * dataFetchSize)) {
              t = t + 1;
@@ -380,14 +378,14 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
           if (real_gid >= NUMDATA) {
             continue;
           }
-	  dataSub = t * dataFetchSize;
+	      dataSub = t * dataFetchSize;
           k = c - dataSub; 
           index = real_gid*NUMDATA;
           d = z - dataSub;
-	  ref_index = numRef + t;  
+	      ref_index = numRef + t;  
           float x_co = (locations[ref_index].x - locations[d].x);
           float y_co = (locations[ref_index].y - locations[d].y); 
-	  float pow_xco = x_co * x_co;
+	      float pow_xco = x_co * x_co;
           float pow_yco = y_co * y_co;
           float pow_plus = sqrt(pow_yco+pow_xco);
           euclideanDistance[index+k] = pow_plus;
@@ -462,20 +460,20 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
    current_copy_stage = (current_copy_stage != 0) ? 0 : numofDataperHalfBatch;
  
    for (int i = firstBatchNum; i < NUMDATA; i+=numBatchToFetch(i)) {
-       nextBatchNum = numBatchToFetch(i);
+      nextBatchNum = numBatchToFetch(i);
       //Collectively acquire the pipeline head stage from all producer threads:
-        pipeline.producer_acquire();
-        cuda::memcpy_async(block, locations + current_copy_stage, cordinates + i, sizeof(LocationPrim) * nextBatchNum,  pipeline);
-        pipeline.producer_commit();
+      pipeline.producer_acquire();
+      cuda::memcpy_async(block, locations + current_copy_stage, cordinates + i, sizeof(LocationPrim) * nextBatchNum,  pipeline);
+      pipeline.producer_commit();
 
-       // Collectively wait for the operations commited to the
-       // previous `compute` stage to complete:
-       pipeline.consumer_wait();
+      // Collectively wait for the operations commited to the
+      // previous `compute` stage to complete:
+      pipeline.consumer_wait();
               
-       t = 0;
-       //current_compute_stage = shared_offset[compute_stage_idx];  
-       totalDataCompute = current_compute_stage + dataFetchSize*blocksize; 
-       for (size_t z = current_compute_stage + threadId, c = global_i + threadId; z < totalDataCompute; z+=blocksize, c+=blocksize)  {
+      t = 0;
+      //current_compute_stage = shared_offset[compute_stage_idx];  
+      totalDataCompute = current_compute_stage + dataFetchSize*blocksize; 
+      for (size_t z = current_compute_stage + threadId, c = global_i + threadId; z < totalDataCompute; z+=blocksize, c+=blocksize)  {
                
 	  if (z >= (current_compute_stage + (t + 1) * dataFetchSize)) {
              t = t + 1;
@@ -486,14 +484,14 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
           if (real_gid >= NUMDATA) {
             continue;
           }
-	  dataSub = t * dataFetchSize;
+	      dataSub = t * dataFetchSize;
           k = c - dataSub; 
           index = real_gid*NUMDATA;
           d = z - dataSub;
-	  ref_index = numRef + t;  
+	      ref_index = numRef + t;  
           float x_co = (locations[ref_index].x - locations[d].x);
           float y_co = (locations[ref_index].y - locations[d].y); 
-	  float pow_xco = x_co * x_co;
+	      float pow_xco = x_co * x_co;
           float pow_yco = y_co * y_co;
           float pow_plus = sqrt(pow_yco+pow_xco);
           euclideanDistance[index+k] = pow_plus;
