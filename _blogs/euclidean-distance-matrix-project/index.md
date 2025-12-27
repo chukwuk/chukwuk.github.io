@@ -118,7 +118,8 @@ Shared memory is an on-chip memory has 100x lower latency and higher memory band
 
 ```cuda
 // Kernel function with shared memory
-__global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, float* euclideanDistance, size_t NUMDATA, int numDataPerThread) {
+__global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, float* euclideanDistance, size_t NUMDATA, 
+   int numDataPerThread) {
     
    size_t gid_start =  blockIdx.x *  blockDim.x;
    size_t gid =  blockIdx.x * blockDim.x + threadIdx.x;
