@@ -398,14 +398,14 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
   
 }
 
+```
+
 ### Nsight compute Speed of light analysis for Kernel 5.
 {% include image-gallery.html images="kernel_five_SOP_analysis.jpg" height="400" %} 
 
 ### Nsight compute memory analysis for Kernel 5.
 {% include image-gallery.html images="kernel_five_memory_analysis.jpg" height="400" %} 
 <br>
-
-```
 
 ## Kernel 6: Multi-Stage Asynchronous Data Copies using cuda::pipeline (optimize L2 and Global local access pattern).
 
