@@ -12,14 +12,14 @@ skills:
 ---
 
 ---
-## Introduction
+## Introduction.
 
 Euclidean matrix distance is an nxn matrix representing the euclidean distance between set of n points in Euclidean space. Euclidean distance matrix has so many application in machine learning, Engineering and robotics and image processing. This technical blog will discuss step by step on how to optimize CUDA kernel for Euclidean Distance Matrix for 2D coordinate points. The equation for calculating the euclidean distance distance between {x<sub>1</sub>, y<sub>1</sub>} and {x<sub>2</sub>, y<sub>2</sub>}:
  
 {% include image-gallery.html images="Euclidean_distance_equation.png" height="100" %} 
 <br> 
 
-## Memory bound vs Compute bound for Euclidean distance Matrix
+## Memory bound vs Compute bound for Euclidean distance Matrix.
 
 The eucildean distance calculation between 2D cooordinate points involves two substraction, two multiplication, one addition and one sqrt. According to this [post](https://forums.developer.nvidia.com/t/performance-tweak-for-single-precision-square-root/173274), sqrt() function involves about four to five floating point operation. Therefore, one euclidean distance calculation between 2D coordinates points involves 9 floating point operation. For 30336 2D coordinate points, which is what was used in this optimization. 
 
@@ -29,7 +29,7 @@ The eucildean distance calculation between 2D cooordinate points involves two su
    
 The Nvidia RTX 5070 Ti has a memory bandwith of 896GB/sec and has a fp32 compute throughput of 41TFLOPS. Therefore, the theoretical time for the calculation is 0.2 milliseconds while the theoretical total time for data read and write is 4.1 milliseconds assuming the both total read and write is 3.68GB. This simple theoretical calculation shows that the euclidean distance matrix calculation is memory-bound.       
 
-## Kernel 1: Naive implementation
+## Kernel 1: Naive implementation.
 
 The naive implementation involves each GPU thread computing the euclidean distance between one coordinate and every other coordinate, which means each GPU thread will compute n euclidean distance out of n x n euclidean distance matrix. Therefore, each block of thread compute (n * blocksize) euclidean distance. In CUDA programming model, threads are execute by warp, which is a group of 32 threads that executes the same instruction simultaneously(Single Instruction Multiple Threads). The minimum memory transaction by a warp is 32 bytes adjacent data (also known sector), which means a warp need four coalesced 32-bytes(sector) transaction to write 32 float data type to global memory if the data are adjacent. For kernel 1, where the data written to global memory are not adjacent(coalesced), a warp will need 32 memory transaction(1024bytes) to write 32 float data type to global memory, which leads to the waste of 992 bytes of memory bandwith per warp. This is due to the row-major storage of the n x n euclidean distance matrix in GPU memory. Consequently, Nsight compute analysis shows only 4.0 bytes of the 32 bytes is utilized by each thread, which means each warp has to write to 32 different sector in order to write 32 float data type to global memory. The kernel 1 function has a compute throughput and memory throughput of 475 GFLOPS and 233 GB/s based on nsight compute. The actual memory throughput is lower when the wasted memory bandwith is considered for global memory write, in which the actual memory throughput is 173 GB/s ((3.68/4.97) * 233 GB/s).    
 
@@ -67,7 +67,7 @@ __global__  void euclideanMatrix(LocationPrim *cordinates, float* euclideanDista
 {% include image-gallery.html images="kernel_one_memory_throughput.jpg" height="400" %} 
 
 <br>
-## Kernel 2: Global Memory Coalescing
+## Kernel 2: Global Memory Coalescing.
 
 The kernel 2 function involves each warp writing the results of the euclidean distance calculations to 32 adjacent float data memory (4 adjacent sectors), which means all warps in a block writes the results of the calculations to 256 adjacent float data memory (32 adjacent sector for a blocksize of 256). The for loop condition in each thread was increased from NUMDATA to NUMDATA * blocksize, however the for loop was updated by blocksize. This allows adjacent threads to compute results that are written to adjacent float data memory. Consequently, kernel 2 function has a compute throughput and memory throughput of 993 GFLOPS and 359 GB/s, which is about 50 percent higher than that of kernel 1 function.  
 
@@ -112,7 +112,7 @@ __global__  void euclideanMatrix(LocationPrim *cordinates, float* euclideanDista
 {% include image-gallery.html images="kernel_two_memory_analysis.jpg" height="400" %} 
 <br>
 
-## Kernel 3: Shared Memory Cache-Blocking
+## Kernel 3: Shared Memory Cache-Blocking.
 
 Shared memory is an on-chip memory has 100x lower latency and higher memory bandwith than uncached global memory (provided there is no bank conflict). The shared memory is used to avoid redundant transfer from global memory by different threads in a block. Shared memory also enable cooperation between threads in a block. Each thread in a block loads a chunk of the 2D coardinates points data in shared memory, after that each threads in a block uses all the data loaded in the shared memory to compute the euclidean distance. The use of shared memory increased compute throughput and memory throughput to 1520 GFLOPS and 516 GB/s based on nsight compute analysis. Additionally, the number of bytes utilized by each thread for global load increased from 14.7 bytes per sector(32 bytes) to 31.7 per sector(32 bytes). The number of bytes utilized by each thread is 31.7 bytes instead of 32 bytes because the reference 2D coordinates point data is loaded twice into shared memory. Each block loads 30336 2D coordinate data points and 256 reference 2D coordinate data points, in which the 256 reference 2D coordinate point data is loaded twice because it is part of the 30336 2D coordinate data points. The total sector loaded by each block is ((30336 + 256) * 8 bytes/32 bytes) = 7648 sectors. The total sector without 256 reference 2D coordinate points is ((30336 * 8 bytes)/32 bytes) = 7584 sectors. The number of bytes per sector utilized by each thread is (7584/7648 * 32 bytes) = 31.7 bytes. This disappears when the 2D coordinate data points on the y-axis are all different from that of x-axis. 
 
@@ -189,7 +189,7 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
 
 
 
-## Kernel 4: Instruction Optimization
+## Kernel 4: Instruction Optimization.
 
 The 32-bit integer division takes significantly more clock cycle than 32-bit integer multiplication, addition and subtraction. According to [CUDA C++ Best Practices Guide](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/), Both 32-bit integer addition and 32-bit integer compare takes one clock cycle per multiprocessor while 32-bit integer multiplication takes 2 clock cycle per multiprocessor. The 32-bit integer divison was replaced with 32-bit integer addition, multiplication and compare, which increased the compute and memory throughput to 1881 GFLOPS and 681 GB/s  based on nsight compute analysis. Microbenchmarking shows that the 32-bit integer division takes approximately 200 clock cycle while the combination of the 32-bit integer addition, multiplication and compare takes approximately 20 clock cycle. Considering, the number of iterations, the approximate runtime difference is ((200 - 20) * 30336)/2.4GHz = 2.28 milliseconds, which is approximately the runtime difference between kernel 3 and kernel 4 based on nsight compute analysis. This runtime difference increase linearly with number of iteration (number of 2D coordinate data points), which shows the importance of instruction optimization when scaling up an algorithm. The code for microbenchmarking is available on my [Github repo](https://github.com/chukwuk/Optimized_GPU_version_for_euclidean_matrix/tree/master/compare_division_clock_cycle_with_bit_compare). The GPU throughput rooflines shows the memory bandwith boundary meets the peak performance boundary.    
 
@@ -260,7 +260,7 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
 {% include image-gallery.html images="kernel_four_memory_analysis_2.jpg" height="400" %} 
 <br>
 
-## Kernel 5: Multi-Stage Asynchronous Data Copies using cuda::pipeline 
+## Kernel 5: Multi-Stage Asynchronous Data Copies using cuda::pipeline. 
 
 cuda::pipeline is a CUDA feature that allows overlap of computation with data movement. For kernel 5, the data movement from the global to shared memory was overlapped with the computation. However, this reduced compute and memory throughput to 1690GFLOPS and 612GB/s based on compute analysis. Additionally, the nsight compute analysis shows that the L2 local load access pattern and DRAM local store access pattern is not optimal, which means some local variable spill into L2 cache and DRAM.    
  
@@ -407,12 +407,13 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
 
 ```
 
-## Kernel 6: Multi-Stage Asynchronous Data Copies using cuda::pipeline (optimize L2 and Global local access)
+## Kernel 6: Multi-Stage Asynchronous Data Copies using cuda::pipeline (optimize L2 and Global local access pattern).
 
 The unoptimal L2 local load access pattern and DRAM local store access pattern was rectified by removing the dynamic indexing from the shared_offset array. The Dynamic indexing forces the cuda compiler to use local memory (that is slower than register) because the compiler does not which element will be accessed until runtime and the compiler cannot assign a register for an unknown element. The register pressure was also reduced by load the reference 2D coordinate data points from the global memory directly to shared memory. This slightly increased kernel 5 compute and memory throughput to 1698GFLOPS and 615GB/s, which are still lower than that of kernel 4. Probably, there was no performance improvement from asynchronous data copies because the 2D coordinate data points is small.      
 
 ```cuda
-__global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, float* euclideanDistance, size_t NUMDATA, int numDataPerThread) {
+__global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, float* euclideanDistance, size_t NUMDATA, 
+   int numDataPerThread) {
     
    size_t gid_start = blockIdx.x *  blockDim.x;    
    size_t gid =  gid_start + threadIdx.x;
