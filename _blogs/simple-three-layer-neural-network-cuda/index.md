@@ -16,10 +16,23 @@ Neural Network is a type of computational model that is inspired by the human br
 
 ## Forward Propagation
 
+Forward propagation is a process where the neural network takes an input to produce an output or prediction. In the three layer neural network, the two hidden layer has a ReLu(Rectified Linear Unit) activation and output layer has a sigmoid activation function. 
+
+### Forward propagation steps in a three layer neural network.
+{% include image-gallery.html images="forward_propagation.png" height="400" %} 
+<br> 
+ 
+### First layer
+
+### Second layer
+
+### Third layer
 
 ## Back propagation
 
+
 ## Conclusion
+
 
 ## References
 
