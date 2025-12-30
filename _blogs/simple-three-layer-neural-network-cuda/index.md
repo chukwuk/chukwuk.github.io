@@ -26,7 +26,7 @@ Forward propagation is a process where the neural network takes an input to prod
 
 The first step involves matrix multiplication between the weights and input data and then the addition of the bias. Row major storage is used to weight and bias in GPU memory while column major storage is used to store the input data in GPU memory because these will allow global coalescing. The column major storage is used to store the matrix mutiplication product in GPU memory because this will allow global coalescing in the third step.  
 ### matrix representation of the first step
-{% include image-gallery.html images="step_1_matrix_mutiply.png" height="400" %} 
+{% include image-gallery.html images="step_1_matrix_multiply.png" height="400" %} 
 ```cuda
 // kernel function for the first step
 __global__  void matrixMulAddRowBasedARR2(float* weightBias, float* xData,  float* activationValues, int wRows,  int xCols, int wColsXRows) {
