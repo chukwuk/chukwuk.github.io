@@ -18,11 +18,38 @@ Neural Network is a type of computational model that is inspired by the human br
 
 Forward propagation is a process where the neural network takes an input to produce an output or prediction. In the three layer neural network, the two hidden layer has a ReLu(Rectified Linear Unit) activation and output layer has a sigmoid activation function. 
 
-### Forward propagation steps in a three layer neural network.
+### Forward propagation steps in a three layer neural network(The steps with the same color happen in the same layer).
 {% include image-gallery.html images="forward_propagation.png" height="400" %} 
 <br> 
  
-### First layer
+### First step
+
+The first step involves matrix multiplication between the weights and input data and then the addition of the bias. Row major storage is used to weight and bias in GPU memory while column major storage is used to store the input data in GPU memory because these will allow global coalescing. The column major storage is used to store the matrix mutiplication product in GPU memory because this will allow global coalescing in the third step.  
+### matrix representation of the first step
+{% include image-gallery.html images="step_1_matrix_mutiply.png" height="400" %} 
+```cuda
+// kernel function for the first step
+__global__  void matrixMulAddRowBasedARR2(float* weightBias, float* xData,  float* activationValues, int wRows,  int xCols, int wColsXRows) {
+   int gid =  blockIdx.x *  blockDim.x +  threadIdx.x;
+    if (gid < (wRows * xCols)) {
+        	
+	int index = gid / wRows;
+	int indexR = gid - (index * wRows);
+        int indexW = index * (wColsXRows);
+        int indexMul = indexR * (wColsXRows+1); 
+    	float sum = 0.0;
+	for (int i = 0; i < wColsXRows; i++)  {
+	   sum+=(weightBias[i+indexMul] * xData[i+indexW]);
+           
+       	}
+	sum+=weightBias[indexMul+wColsXRows];
+        activationValues[gid] = sum;	
+    }
+
+}
+
+```
+
 
 ### Second layer
 
