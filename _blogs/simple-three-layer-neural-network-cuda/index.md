@@ -47,9 +47,22 @@ __global__  void matrixMulAddRowBasedARR2(float* weightBias, float* xData,  floa
     }
 
 }
+```
+### second step
+
+The second step involves applying the ReLu function on the product of the first step.
+```cuda
+// kernel function for the second step
+__global__  void matrixReLu(float* activation, int actLength) {
+     
+    int gid =  blockIdx.x *  blockDim.x +  threadIdx.x;
+
+    if (gid < actLength) {
+       activation[gid] = (activation[gid] > 0.0) ? activation[gid] : 0.0;
+    }
+}
 
 ```
-
 
 ### Second layer
 
