@@ -67,7 +67,7 @@ __global__  void matrixReLu(float* activation, int actLength) {
 ```
 ### Second layer (Third step).
 
-Third step operation is the same as the first step but it involves matrix mutiplication of second layer weights with the output of Layer one (second step) and then addition of the second layer bias. The third step uses the same kernel function as the first step. 
+Third step operation is the same as the first step but it involves matrix mutiplication of second layer weights with the output of layer one (second step) and then addition of the second layer bias. The third step uses the same kernel function as the first step. 
 ### matrix representation of the third step.
 {% include image-gallery.html images="step_3_matrix_multiply.png" height="400" %} 
 <br>  
@@ -78,8 +78,25 @@ Fourth step operation is the same as the second step, in which ReLu function is 
 {% include image-gallery.html images="step_4_ReLu_function.png" height="400" %} 
 <br>  
 ### Third layer (fifth step).
+
+Fifth step operation is the same as the first step but it involves matrix mutiplication of third layer weights with output layer two(fourth step) and then addition of the third layer bias. The fifth step uses the same kernel function as the first step. The last layer must have a single neuron since the code is structured for only binary classification. In the future, the code will be updated to multiclass classification with softmax. 
+{% include image-gallery.html images="step_5_matrix_multiply.png" height="400" %} 
+<br>
 ### Third layer (sixth step).
 
+The sixth step involves applying the sigmoid function on the product of the fifth step.
+{% include image-gallery.html images="step_6_sigmoid_function.png" height="400" %} 
+```cuda
+// Kernel function for the sixth step
+__global__  void matrixSigmoid(float* activation, int actLength) {
+     
+    int gid =  blockIdx.x *  blockDim.x +  threadIdx.x;
+
+    if (gid < actLength) {
+       activation[gid] = 1/(1 + exp(-activation[gid]));
+    }
+}
+```
 
 ## Back propagation
 
