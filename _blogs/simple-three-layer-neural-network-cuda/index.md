@@ -22,9 +22,9 @@ Forward propagation is a process where the neural network takes an input to prod
 {% include image-gallery.html images="forward_propagation.png" height="400" %} 
 <br> 
  
-### First step
+### First Layer (First step).
 
-The first step involves matrix multiplication between the weights and input data and then the addition of the bias. Row major storage is used to weight and bias in GPU memory while column major storage is used to store the input data in GPU memory because these will allow global coalescing. The column major storage is used to store the matrix mutiplication product in GPU memory because this will allow global coalescing in the third step.  
+The first step involves matrix multiplication between First layer weights and input data and then the addition of the First Layer bias. Row major storage is used to weight and bias in GPU memory while column major storage is used to store the input data in GPU memory because these will allow global coalescing. The column major storage is used to store the matrix mutiplication product in GPU memory because this will allow global coalescing in the third step. The first step result is left in the GPU memory to be used by the second step.   
 ### matrix representation of the first step
 {% include image-gallery.html images="step_1_matrix_multiply.png" height="400" %} 
 ```cuda
@@ -48,7 +48,7 @@ __global__  void matrixMulAddRowBasedARR2(float* weightBias, float* xData,  floa
 
 }
 ```
-### second step
+### First layer (second step).
 
 The second step involves applying the ReLu function on the product of the first step.
 ### matrix representation of the second step.
@@ -65,9 +65,21 @@ __global__  void matrixReLu(float* activation, int actLength) {
 }
 
 ```
-### Second layer
+### Second layer (Third step).
 
-### Third layer
+Third step operation is the same as the first step but it involves matrix mutiplication of second layer weights with the output of Layer one (second step) and then addition of the second layer bias. The third step uses the same kernel function as the first step. 
+### matrix representation of the third step.
+{% include image-gallery.html images="step_3_matrix_multiply.png" height="400" %} 
+<br>  
+### Second layer (four step).
+
+Fourth step operation is the same as the second step, in which ReLu function is applied on the third step result. The fourth step uses the same kernel function as second step.  
+### matrix representation of the fourth step.
+{% include image-gallery.html images="step_4_ReLu_function.png" height="400" %} 
+<br>  
+### Third layer (fifth step).
+### Third layer (sixth step).
+
 
 ## Back propagation
 
