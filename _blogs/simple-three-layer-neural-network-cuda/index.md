@@ -80,11 +80,13 @@ Fourth step operation is the same as the second step, in which ReLu function is 
 ### Third layer (fifth step).
 
 Fifth step operation is the same as the first step but it involves matrix mutiplication of third layer weights with output layer two(fourth step) and then addition of the third layer bias. The fifth step uses the same kernel function as the first step. The last layer must have a single neuron since the code is structured for only binary classification. In the future, the code will be updated to multiclass classification with softmax. 
+### matrix representation of the fifth step.
 {% include image-gallery.html images="step_5_matrix_multiply.png" height="400" %} 
 <br>
 ### Third layer (sixth step).
 
 The sixth step involves applying the sigmoid function on the product of the fifth step.
+### matrix representation of the sixth step.
 {% include image-gallery.html images="step_6_sigmoid_function.png" height="400" %} 
 ```cuda
 // Kernel function for the sixth step
@@ -97,7 +99,6 @@ __global__  void matrixSigmoid(float* activation, int actLength) {
     }
 }
 ```
-
 ## Back propagation
 
 
