@@ -12,7 +12,7 @@ skills:
 ---
 ## Introduction  
 
-Neural Network is a type of computational model that is inspired by the human brain, in which the neurons are organized in layers and the neurons in different layer are interconnected. Neural networks has many application in autonomous driving, natural language processing and image/speech recognition. In this technical blog, I will discuss CUDA implementation of one forward and backward propagation of a three-layer neural network, in which the result of the CUDA implementation was compared with Pytorch implementation. The comparison with Pytorch implementation helps with debugging since Pytorch has been well tested by the deep learning development community. Additionally, the kernel functions used in this blog were not optimized. I will discuss kernel optimization in a another blog and also there is a lot of optimization opportunities for all the kernel functions used here. 
+Neural Network is a type of computational model that is inspired by the human brain, in which the neurons are organized in layers and the neurons in different layer are interconnected. Neural networks has many application in autonomous driving, natural language processing and image/speech recognition. In this technical blog, I will discuss CUDA implementation of one forward and backward propagation of a three-layer neural network, in which the result of the CUDA implementation was compared with Pytorch implementation. The comparison with Pytorch implementation helps with debugging since Pytorch has been well tested by the deep learning development community. The Pytorch initialized weights and biases are used in CUDA implementation because it easier for comparison between Pytorch and CUDA implementation. Additionally, the kernel functions used in this blog were not optimized. I will discuss kernel optimization in a another blog and also there is a lot of optimization opportunities for all the kernel functions used here. 
 
 ## Forward Propagation
 
@@ -122,7 +122,7 @@ __global__  void elementWiseSub(float* firstArray, float* secondArray, int array
 <br>
 ### Fifth step
 
-The fifth step requires calculating the derivatives of W3, b3 and a2 with respect with to the loss function. First, dL/dZ3 is transposed from column major storage to row major storage.  
+The fifth step requires calculating the derivatives of W3, b3 and a2 with respect with to the loss function. First, dL/dZ3 is transposed from column major storage to row major storage to make easier to reuse kernel function.   
 ```cuda
 // kernel function used for transpose dL/dZ3 from column major storage to row major storage
 __global__  void matrixTransposeSubBias(float* matrixArray, float* matrixArrayTranspose, int nrows, int ncols) {
@@ -167,25 +167,26 @@ __global__  void matrixdL_dW3(float* weightBias, float* xData,  float* activatio
         int indexStart = gid % xCols;
         int IndexMul = indexStart * wColsXRows; 
     	float sum = 0.0;
-	for (int i = 0; i < wColsXRows; i++)  {
-	   sum+=(weightBias[i+indexW] * xData[i+IndexMul]);
-           
+    	for (int i = 0; i < wColsXRows; i++)  {
+	       sum+=(weightBias[i+indexW] * xData[i+IndexMul]);   
        	}
         activationValues[gid] = sum/float(wColsXRows);	
 	 
     }
 
 }
-
-
 ```
 {% include image-gallery.html images="backward_propagation_2.png" height="400" %} 
 <br>
 {% include image-gallery.html images="backward_propagation_3.png" height="400" %} 
 <br>
+
 ## Conclusion
 
+This techical blog discussed step by step CUDA implementation of a one forward and backpropagation of a three layer neural network and compare results with Pytorch. All my code is available on (Github)[https://github.com/chukwuk/CUDA_implementation_of_a_three_layer_neural_network/tree/main].
 
 ## References
 
+* (Neural Networks and Deep Learning cousera course)[https://www.coursera.org].
+* (Google)[https://www.google.com/?zx=1767253382136&no_sw_cr=1].
  
