@@ -24,7 +24,8 @@ Forward propagation is a process where the neural network takes an input to prod
  
 ### First Layer (First step).
 
-The first step involves matrix multiplication between First layer weights and input data and then the addition of the First Layer bias. Row major storage is used to weight and bias in GPU memory while column major storage is used to store the input data in GPU memory because these will allow global coalescing. The column major storage is used to store the matrix mutiplication product in GPU memory because this will allow global coalescing in the third step. The first step result is left in the GPU memory to be used by the second step.   
+The first step involves matrix multiplication between First layer weights and input data and then the addition of the First Layer bias. Row major storage is used to weight and bias in GPU memory while column major storage is used to store the input data in GPU memory. The column major storage is used to store the matrix mutiplication product in GPU memory. The first step result is left in the GPU memory to be used by the second step. Please note, different memory should be allocated for the weight and bias for one layer rather one memory for weight and bias of one layer as in this blog.   
+    
 ### matrix representation of the first step
 {% include image-gallery.html images="step_1_matrix_multiply.png" height="400" %} 
 ```cuda
@@ -99,9 +100,14 @@ __global__  void matrixSigmoid(float* activation, int actLength) {
     }
 }
 ```
-## Back propagation
+## Backward propagation.
 
-
+{% include image-gallery.html images="backward_propagation_1.png" height="400" %} 
+<br>
+{% include image-gallery.html images="backward_propagation_2.png" height="400" %} 
+<br>
+{% include image-gallery.html images="backward_propagation_3.png" height="400" %} 
+<br>
 ## Conclusion
 
 
