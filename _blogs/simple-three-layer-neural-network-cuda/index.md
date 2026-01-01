@@ -183,10 +183,10 @@ __global__  void matrixdL_dW3(float* weightBias, float* xData,  float* activatio
 
 ## Conclusion
 
-This techical blog discussed step by step CUDA implementation of a one forward and backpropagation of a three layer neural network and compare results with Pytorch. All my code is available on (Github)[https://github.com/chukwuk/CUDA_implementation_of_a_three_layer_neural_network/tree/main].
+This techical blog discussed step by step CUDA implementation of a one forward and backpropagation of a three layer neural network and compare results with Pytorch. All my code is available on [Github](https://github.com/chukwuk/CUDA_implementation_of_a_three_layer_neural_network/tree/main).
 
 ## References
 
-* (Neural Networks and Deep Learning cousera course)[https://www.coursera.org].
-* (Google)[https://www.google.com/?zx=1767253382136&no_sw_cr=1].
+* [Neural Networks and Deep Learning cousera course](https://www.coursera.org).
+* [Google](https://www.google.com/?zx=1767253382136&no_sw_cr=1).
  
