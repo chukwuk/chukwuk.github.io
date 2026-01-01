@@ -102,8 +102,83 @@ __global__  void matrixSigmoid(float* activation, int actLength) {
 ```
 ## Backward propagation.
 
+Backward propagation involves changing the weight and biases through the network in other to minimize the error. The backward propagation is more computationally complex than the forward propagation because it involves calculation of the gradient of the weights and biases by applying chain rules backward through the neural network. In the technical blog, the cuda implementation of the backward propagation was simplified by starting from the sixth step. 
+### Sixth step
+The sixth step involves substracting the actual data from the predicted data (dL/dZ3).  
 {% include image-gallery.html images="backward_propagation_1.png" height="400" %} 
+```cuda
+// kernel function for the sixth step
+__global__  void elementWiseSub(float* firstArray, float* secondArray, int arraySize) {
+
+   
+   int gid = blockIdx.x * blockDim.x + threadIdx.x;
+   
+   if (gid < (arraySize)) {
+	firstArray[gid]=firstArray[gid] - secondArray[gid]; 
+   }
+
+}
+```
 <br>
+### Fifth step
+
+The fifth step requires calculating the derivatives of W3, b3 and a2 with respect with to the loss function. First, dL/dZ3 is transposed from column major storage to row major storage.  
+```cuda
+// kernel function used for transpose dL/dZ3 from column major storage to row major storage
+__global__  void matrixTransposeSubBias(float* matrixArray, float* matrixArrayTranspose, int nrows, int ncols) {
+     
+    int gid =  blockIdx.x *  blockDim.x +  threadIdx.x;
+    int index = gid / ncols;
+    int indexR = gid - (index * ncols);
+
+    if (gid < (nrows*ncols)) {
+       matrixArrayTranspose[index+(indexR*nrows)] = matrixArray[gid];
+    } 
+}
+```
+```cuda
+// kernel function used for transpose a2 from column major storage to row major storage.
+// kernel function add one extra rows that is filled with one b/cos it used to calculate dL/db3 since W and b is in the same matrix 
+__global__  void matrixTransposeAddBias(float* matrixArray, float* matrixArrayTranspose, int nrows, int ncols) {
+     
+    int gid =  blockIdx.x *  blockDim.x +  threadIdx.x;
+    int index = gid / ncols;
+    int indexR = gid - (index * ncols);
+
+    if (gid < (nrows*(ncols+1))) {
+       if (gid < (nrows*ncols)) { 
+          matrixArrayTranspose[index+(indexR*nrows)] = matrixArray[gid];
+       } else {
+
+          matrixArrayTranspose[gid] = 1.0;
+       }
+       
+    } 
+}
+```
+```cuda
+// kernel function for calculation of dL/dW3 and dL/db3 
+__global__  void matrixdL_dW3(float* weightBias, float* xData,  float* activationValues, int wRows,  int xCols, int wColsXRows) {
+   int gid =  blockIdx.x *  blockDim.x +  threadIdx.x; 
+    if (gid < (wRows * xCols)) {
+        	
+        int index = gid / xCols;
+        int indexW = index * (wColsXRows);
+        int indexStart = gid % xCols;
+        int IndexMul = indexStart * wColsXRows; 
+    	float sum = 0.0;
+	for (int i = 0; i < wColsXRows; i++)  {
+	   sum+=(weightBias[i+indexW] * xData[i+IndexMul]);
+           
+       	}
+        activationValues[gid] = sum/float(wColsXRows);	
+	 
+    }
+
+}
+
+
+```
 {% include image-gallery.html images="backward_propagation_2.png" height="400" %} 
 <br>
 {% include image-gallery.html images="backward_propagation_3.png" height="400" %} 
