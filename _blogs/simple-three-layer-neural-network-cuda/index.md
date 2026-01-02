@@ -122,7 +122,7 @@ __global__  void elementWiseSub(float* firstArray, float* secondArray, int array
 <br>
 ### Fifth step
 
-The fifth step requires calculating the derivatives of W3, b3 and a2 with respect with to the loss function. First, dL/dZ3 is transposed from column major storage to row major storage to make easier to reuse kernel function.   
+The fifth step requires calculating the derivatives of W3, b3 and a2 with respect with to the loss function. First, dL/dZ3 is transposed from column major storage to row major storage to make easier to reuse kernel function. The dL/dZ3 is multiplied with the transpose of a2 to get dW3 and db3.      
 ```cuda
 // kernel function used for transpose dL/dZ3 from column major storage to row major storage
 __global__  void matrixTransposeSubBias(float* matrixArray, float* matrixArrayTranspose, int nrows, int ncols) {
@@ -179,6 +179,24 @@ __global__  void matrixdL_dW3(float* weightBias, float* xData,  float* activatio
 }
 ```
 {% include image-gallery.html images="step_6_backward_propagation_2.png" height="200" %} 
+```cuda
+// kernel function is used to update the weight and biases with adam optimizer
+__global__  void AdamOptUpdate(float* weightBias, float* dL_dW3, int len, float lr, float beta1, float beta2, float epsilon, float* mt, float* vt) {
+   int gid =  blockIdx.x *  blockDim.x +  threadIdx.x;
+    if (gid < len) {
+        
+        mt[gid] = (beta1*mt[gid]) + (1 - beta1)*dL_dW3[gid];	
+        vt[gid] = (beta2*vt[gid]) + (1 - beta2)*(powf(dL_dW3[gid], 2.0));
+
+	float mt_crt = mt[gid]/(1-beta1);
+	float vt_crt = vt[gid]/(1-beta2);
+	
+	weightBias[gid] = weightBias[gid] - ((mt_crt/(sqrt(vt_crt + epsilon)))*lr);
+         	
+    }
+
+}
+```
 
 {% include image-gallery.html images="backward_propagation_2.png" height="200" %} 
 <br>
