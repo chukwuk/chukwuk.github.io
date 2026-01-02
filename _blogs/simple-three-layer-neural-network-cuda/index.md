@@ -122,7 +122,7 @@ __global__  void elementWiseSub(float* firstArray, float* secondArray, int array
 <br>
 ### Fifth step
 
-The fifth step requires calculating the derivatives of W3, b3 and a2 with respect with to the loss function. First, dL/dZ3 is transposed from column major storage to row major storage to make easier to reuse kernel function. The dL/dZ3 is multiplied with the transpose of a2 to get dW3 and db3.      
+The fifth step requires calculating the derivatives of W3, b3 and a2 with respect with to the loss function. First, dL/dZ3 is transposed from column major storage to row major storage to make easier to reuse kernel function. The dL/dZ3 is multiplied with the transpose of a2 to get dW3 and db3. Transpose of W3 is multiplied with dL/dZ3 to get dL/da2.       
 ```cuda
 // kernel function used for transpose dL/dZ3 from column major storage to row major storage
 __global__  void matrixTransposeSubBias(float* matrixArray, float* matrixArrayTranspose, int nrows, int ncols) {
@@ -195,6 +195,24 @@ __global__  void AdamOptUpdate(float* weightBias, float* dL_dW3, int len, float 
          	
     }
 
+}
+```
+```cuda
+// kernel function is used to calculate dL/da2 from the matrix multiplication of W3 Transpose with dL/dZ3 
+__global__  void matrixMultRow(float* weightBias, float* xData,  float* activationValues, int wRows,  int xCols, int wColsXRows) {
+   int gid =  blockIdx.x *  blockDim.x +  threadIdx.x;   
+    if (gid < (wRows * xCols)) {
+        	
+        int index = gid / xCols;
+        int indexW = index * (wColsXRows);
+        int indexStart = gid % xCols;
+        int IndexMul = indexStart * wColsXRows; 
+    	float sum = 0.0;
+	    for (int i = 0; i < wColsXRows; i++)  {
+	       sum+=(weightBias[i+indexW] * xData[i+IndexMul]);  
+       	}
+        activationValues[gid] = sum;	
+    }
 }
 ```
 
