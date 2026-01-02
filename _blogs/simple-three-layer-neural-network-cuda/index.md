@@ -157,7 +157,7 @@ __global__  void matrixTransposeAddBias(float* matrixArray, float* matrixArrayTr
     } 
 }
 ```
-{% include image-gallery.html images="step__6_backward_propagation_1.png" height="200" %} 
+{% include image-gallery.html images="step_6_backward_propagation_1.png" height="200" %} 
 ```cuda
 // kernel function for calculation of dL/dW3 and dL/db3 
 __global__  void matrixdL_dW3(float* weightBias, float* xData,  float* activationValues, int wRows,  int xCols, int wColsXRows) {
