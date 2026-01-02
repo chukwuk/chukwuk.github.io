@@ -253,9 +253,12 @@ __global__  void elementWiseMult(float* firstArray, float* secondArray, float* o
 The third step is the same as the fifth step but it is for the derivatives of W2, b2 and a1 with respect with to the loss function. The dL/dZ2 is multiplied with the transpose of a1 to get dW2 and db2. Transpose of W3 is multiplied with dL/dZ2 to get dL/da2. Third step uses the same kernel function as the fifth step.
        
 ### Second step
+
+The second step is the same as the fourth step.  
 {% include image-gallery.html images="backward_propagation_3.png" height="200" %} 
 <br>
 ### First step
+The first step is the same as the third step but it is for the derivatives of W1 and b1 with respect with to the loss function. 
 
 ## Conclusion
 
