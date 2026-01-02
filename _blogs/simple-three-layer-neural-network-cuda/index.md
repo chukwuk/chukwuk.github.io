@@ -19,7 +19,7 @@ Neural Network is a type of computational model that is inspired by the human br
 Forward propagation is a process where the neural network takes an input to produce an output or prediction. In the three layer neural network, the two hidden layer has a ReLu(Rectified Linear Unit) activation and output layer has a sigmoid activation function. 
 
 ### Forward propagation steps in a three layer neural network(The steps with the same color happen in the same layer).
-{% include image-gallery.html images="forward_propagation.png" height="400" %} 
+{% include image-gallery.html images="forward_propagation.png" height="200" %} 
 <br> 
  
 ### First Layer (First step).
@@ -27,7 +27,7 @@ Forward propagation is a process where the neural network takes an input to prod
 The first step involves matrix multiplication between First layer weights and input data and then the addition of the First Layer bias. Row major storage is used to weight and bias in GPU memory while column major storage is used to store the input data in GPU memory. The column major storage is used to store the matrix mutiplication product in GPU memory. The first step result is left in the GPU memory to be used by the second step. Please note, different memory should be allocated for the weight and bias for one layer rather one memory for weight and bias of one layer as in this blog.   
     
 ### matrix representation of the first step
-{% include image-gallery.html images="step_1_matrix_multiply.png" height="400" %} 
+{% include image-gallery.html images="step_1_matrix_multiply.png" height="200" %} 
 ```cuda
 // kernel function for the first step
 __global__  void matrixMulAddRowBasedARR2(float* weightBias, float* xData,  float* activationValues, int wRows,  int xCols, int wColsXRows) {
@@ -53,7 +53,7 @@ __global__  void matrixMulAddRowBasedARR2(float* weightBias, float* xData,  floa
 
 The second step involves applying the ReLu function on the product of the first step.
 ### matrix representation of the second step.
-{% include image-gallery.html images="step_2_ReLu_function.png" height="400" %} 
+{% include image-gallery.html images="step_2_ReLu_function.png" height="200" %} 
 ```cuda
 // kernel function for the second step
 __global__  void matrixReLu(float* activation, int actLength) {
@@ -70,25 +70,25 @@ __global__  void matrixReLu(float* activation, int actLength) {
 
 Third step operation is the same as the first step but it involves matrix mutiplication of second layer weights with the output of layer one (second step) and then addition of the second layer bias. The third step uses the same kernel function as the first step. 
 ### matrix representation of the third step.
-{% include image-gallery.html images="step_3_matrix_multiply.png" height="400" %} 
+{% include image-gallery.html images="step_3_matrix_multiply.png" height="200" %} 
 <br>  
 ### Second layer (four step).
 
 Fourth step operation is the same as the second step, in which ReLu function is applied on the third step result. The fourth step uses the same kernel function as second step.  
 ### matrix representation of the fourth step.
-{% include image-gallery.html images="step_4_ReLu_function.png" height="400" %} 
+{% include image-gallery.html images="step_4_ReLu_function.png" height="200" %} 
 <br>  
 ### Third layer (fifth step).
 
 Fifth step operation is the same as the first step but it involves matrix mutiplication of third layer weights with output layer two(fourth step) and then addition of the third layer bias. The fifth step uses the same kernel function as the first step. The last layer must have a single neuron since the code is structured for only binary classification. In the future, the code will be updated to multiclass classification with softmax. 
 ### matrix representation of the fifth step.
-{% include image-gallery.html images="step_5_matrix_multiply.png" height="400" %} 
+{% include image-gallery.html images="step_5_matrix_multiply.png" height="200" %} 
 <br>
 ### Third layer (sixth step).
 
 The sixth step involves applying the sigmoid function on the product of the fifth step.
 ### matrix representation of the sixth step.
-{% include image-gallery.html images="step_6_sigmoid_function.png" height="400" %} 
+{% include image-gallery.html images="step_6_sigmoid_function.png" height="200" %} 
 ```cuda
 // Kernel function for the sixth step
 __global__  void matrixSigmoid(float* activation, int actLength) {
@@ -105,7 +105,7 @@ __global__  void matrixSigmoid(float* activation, int actLength) {
 Backward propagation involves changing the weight and biases through the network in other to minimize the error. The backward propagation is more computationally complex than the forward propagation because it involves calculation of the gradient of the weights and biases by applying chain rules backward through the neural network. In the technical blog, the cuda implementation of the backward propagation was simplified by starting from the sixth step. 
 ### Sixth step
 The sixth step involves substracting the actual data from the predicted data (dL/dZ3).  
-{% include image-gallery.html images="backward_propagation_1.png" height="400" %} 
+{% include image-gallery.html images="backward_propagation_1.png" height="200" %} 
 ```cuda
 // kernel function for the sixth step
 __global__  void elementWiseSub(float* firstArray, float* secondArray, int arraySize) {
@@ -136,6 +136,7 @@ __global__  void matrixTransposeSubBias(float* matrixArray, float* matrixArrayTr
     } 
 }
 ```
+
 ```cuda
 // kernel function used for transpose a2 from column major storage to row major storage.
 // kernel function add one extra rows that is filled with one b/cos it used to calculate dL/db3 since W and b is in the same matrix 
@@ -156,6 +157,7 @@ __global__  void matrixTransposeAddBias(float* matrixArray, float* matrixArrayTr
     } 
 }
 ```
+{% include image-gallery.html images="step__6_backward_propagation_1.png" height="200" %} 
 ```cuda
 // kernel function for calculation of dL/dW3 and dL/db3 
 __global__  void matrixdL_dW3(float* weightBias, float* xData,  float* activationValues, int wRows,  int xCols, int wColsXRows) {
@@ -176,9 +178,11 @@ __global__  void matrixdL_dW3(float* weightBias, float* xData,  float* activatio
 
 }
 ```
-{% include image-gallery.html images="backward_propagation_2.png" height="400" %} 
+{% include image-gallery.html images="step_6_backward_propagation_2.png" height="200" %} 
+
+{% include image-gallery.html images="backward_propagation_2.png" height="200" %} 
 <br>
-{% include image-gallery.html images="backward_propagation_3.png" height="400" %} 
+{% include image-gallery.html images="backward_propagation_3.png" height="200" %} 
 <br>
 
 ## Conclusion
