@@ -80,10 +80,31 @@ Fourth step operation is the same as the second step, in which ReLu function is 
 <br>  
 ### Third layer (fifth step).
 
-Fifth step operation is the same as the first step but it involves matrix mutiplication of third layer weights with output layer two(fourth step) and then addition of the third layer bias. The fifth step uses the same kernel function as the first step. The last layer must have a single neuron since the code is structured for only binary classification. In the future, the code will be updated to multiclass classification with softmax. 
+Fifth step operation is the same as the first step but it involves matrix mutiplication of third layer weights with output layer two(fourth step) and then addition of the third layer bias. The fifth step uses different kernel function since the output is row major storage. The last layer must have a single neuron since the code is structured for only binary classification. In the future, the code will be updated to multiclass classification with softmax. 
 ### matrix representation of the fifth step.
 {% include image-gallery.html images="step_5_matrix_multiply.png" height="200" %} 
 <br>
+```cuda
+__global__  void matrixMulAddRowBasedARR(float* weightBias, float* xData,  float* activationValues, int wRows,  int xCols, int wColsXRows) {
+   int gid =  blockIdx.x *  blockDim.x +  threadIdx.x;
+    if (gid < (wRows * xCols)) {
+        	
+	   int index = gid / xCols;
+       int indexR = gid - (index * xCols);
+       int indexW = index * (wColsXRows+1);
+       int IndexMul = indexR * wColsXRows; 
+       float sum = 0.0;
+	   for (int i = 0; i < wColsXRows; i++)  {
+	       sum+=(weightBias[i+indexW] * xData[i+IndexMul]);
+           
+       	}
+    	sum+=weightBias[indexW+wColsXRows];
+        activationValues[index+(indexR*wRows)] = sum;	
+    }
+
+}
+
+```
 ### Third layer (sixth step).
 
 The sixth step involves applying the sigmoid function on the product of the fifth step.
@@ -122,20 +143,7 @@ __global__  void elementWiseSub(float* firstArray, float* secondArray, int array
 <br>
 ### Fifth step
 
-The fifth step requires calculating the derivatives of W3, b3 and a2 with respect with to the loss function. First, dL/dZ3 is transposed from column major storage to row major storage to make easier to reuse kernel function. The dL/dZ3 is multiplied with the transpose of a2 to get dW3 and db3. Transpose of W3 is multiplied with dL/dZ3 to get dL/da2.       
-```cuda
-// kernel function used for transpose dL/dZ3 from column major storage to row major storage
-__global__  void matrixTransposeSubBias(float* matrixArray, float* matrixArrayTranspose, int nrows, int ncols) {
-     
-    int gid =  blockIdx.x *  blockDim.x +  threadIdx.x;
-    int index = gid / ncols;
-    int indexR = gid - (index * ncols);
-
-    if (gid < (nrows*ncols)) {
-       matrixArrayTranspose[index+(indexR*nrows)] = matrixArray[gid];
-    } 
-}
-```
+The fifth step requires calculating the derivatives of W3, b3 and a2 with respect with to the loss function. The dL/dZ3 is multiplied with the transpose of a2 to get dW3 and db3. Transpose of W3 is multiplied with dL/dZ3 to get dL/da2.       
 
 ```cuda
 // kernel function used for transpose a2 from column major storage to row major storage.
@@ -215,11 +223,39 @@ __global__  void matrixMultRow(float* weightBias, float* xData,  float* activati
     }
 }
 ```
-
+### Fourth step
 {% include image-gallery.html images="backward_propagation_2.png" height="200" %} 
 <br>
+```cuda
+// kernel function for the derivative of the ReLu function
+__global__  void matrixDiffReLu(float* activation, int actLength) {
+     
+    int gid =  blockIdx.x *  blockDim.x +  threadIdx.x;
+
+    if (gid < actLength) {
+       activation[gid] = (activation[gid] > 0.0) ? 1.0 : 0.0;
+    }
+}
+```
+```cuda
+// kernel function for the elementwise multiplication of dL/da2 * ReLu'(Z2]
+__global__  void elementWiseMult(float* firstArray, float* secondArray, float* outputArray, int arraySize) {
+   int gid = blockIdx.x * blockDim.x + threadIdx.x;
+   
+   if (gid < (arraySize)) {
+	outputArray[gid]=firstArray[gid] * secondArray[gid]; 
+   }
+
+}
+```
+### Third step
+
+The third step is the same as the fifth step but it is for the derivatives of W2, b2 and a1 with respect with to the loss function. The dL/dZ2 is multiplied with the transpose of a1 to get dW2 and db2. Transpose of W3 is multiplied with dL/dZ2 to get dL/da2. Third step uses the same kernel function as the fifth step.
+       
+### Second step
 {% include image-gallery.html images="backward_propagation_3.png" height="200" %} 
 <br>
+### First step
 
 ## Conclusion
 
