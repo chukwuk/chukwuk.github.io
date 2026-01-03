@@ -12,7 +12,7 @@ skills:
 ---
 ## Introduction  
 
-Neural Network is a type of computational model that is inspired by the human brain, in which the neurons are organized in layers and the neurons in different layer are interconnected. Neural networks has many application in autonomous driving, natural language processing and image/speech recognition. In this technical blog, I will discuss CUDA implementation of one forward and backward propagation of a three-layer neural network, in which the result of the CUDA implementation was compared with Pytorch implementation. The comparison with Pytorch implementation helps with debugging since Pytorch has been well tested by the deep learning development community. The Pytorch initialized weights and biases are used in CUDA implementation because it easier for comparison between Pytorch and CUDA implementation. This blog experimented with allocating one memory for the weights and biases of one layer. Additionally, the kernel functions used in this blog were not optimized. I discussed kernel optimization in this [blog](https://chukwuk.github.io/blogs/euclidean-distance-matrix-project/index/) and also there is a lot of optimization opportunities for all the kernel functions used here. 
+Neural Network is a type of computational model that is inspired by the human brain, in which the neurons are organized in layers and the neurons in different layer are interconnected. Neural networks has many application in autonomous driving, natural language processing and image/speech recognition. In this technical blog, I will discuss CUDA implementation of one forward and backward propagation of a three-layer neural network, in which the result of the CUDA implementation was compared with Pytorch implementation. The comparison with Pytorch implementation helps with debugging since Pytorch has been well tested by the deep learning development community. The Pytorch initialized weights and biases are used in CUDA implementation because it easier for comparison between Pytorch and CUDA implementation. This blog experimented with allocating one memory for the weights and biases of one layer however the storage will be restricted to column major for efficient memory bandwith. This technical blog is intended to document my understanding on how neural network works and its CUDA implementation. Additionally, the kernel functions used in this blog were not optimized. I discussed kernel optimization in this [blog](https://chukwuk.github.io/blogs/euclidean-distance-matrix-project/index/) and also there is a lot of optimization opportunities for all the kernel functions used here. 
 
 ## Forward Propagation
 
@@ -143,7 +143,7 @@ __global__  void elementWiseSub(float* firstArray, float* secondArray, int array
 <br>
 ### Fifth step
 
-The fifth step requires calculating the derivatives of W3, b3 and a2 with respect with to the loss function. The dL/dZ3 is multiplied with the transpose of a2 to get dW3 and db3. Transpose of W3 is multiplied with dL/dZ3 to get dL/da2.       
+The fifth step requires calculating the derivatives of W3, b3 and a2 with respect with to the loss function. The dL/dZ3 is multiplied with the transpose of a2 to get dW3 and db3. Transpose of W3 is multiplied with dL/dZ3 to get dL/da2. The matrixTransposeAddBias will lead to allocating extra GPU memory for dL/da2, that is the (number of training data * bias datatype size). Therefore, matrixdL_dW3 function will be updated so that extra GPU memory will not be allocated for dL/da2.       
 
 ```cuda
 // kernel function used for transpose a2 from column major storage to row major storage.
@@ -224,6 +224,8 @@ __global__  void matrixMultRow(float* weightBias, float* xData,  float* activati
 }
 ```
 ### Fourth step
+
+The derivative of the ReLu(x) is one if ReLu(x) is x and zero if ReLu(x) is 0. The fourth step is the elementwise multiplication of the derivative of ReLu(x) with dL/da2. 
 {% include image-gallery.html images="backward_propagation_2.png" height="200" %} 
 <br>
 ```cuda
@@ -251,7 +253,11 @@ __global__  void elementWiseMult(float* firstArray, float* secondArray, float* o
 ### Third step
 
 The third step is the same as the fifth step but it is for the derivatives of W2, b2 and a1 with respect with to the loss function. The dL/dZ2 is multiplied with the transpose of a1 to get dW2 and db2. Transpose of W3 is multiplied with dL/dZ2 to get dL/da2. Third step uses the same kernel function as the fifth step.
-       
+
+{% include image-gallery.html images="step_4_backward_propagation_1.png" height="200" %} 
+{% include image-gallery.html images="step_4_backward_propagation_2.png" height="200" %} 
+{% include image-gallery.html images="step_4_backward_propagation_3.png" height="200" %} 
+
 ### Second step
 
 The second step is the same as the fourth step.  
