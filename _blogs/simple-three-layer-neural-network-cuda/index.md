@@ -256,7 +256,7 @@ The third step is the same as the fifth step but it is for the derivatives of W2
 
 {% include image-gallery.html images="step_4_backward_propagation_1.png" height="200" %} 
 {% include image-gallery.html images="step_4_backward_propagation_2.png" height="200" %} 
-{% include image-gallery.html images="step_4_backward_propagation_3.png" height="200" %} 
+{% include image-gallery.html images="step_4_backward_propagation_3.png" height="300" %} 
 
 ### Second step
 
