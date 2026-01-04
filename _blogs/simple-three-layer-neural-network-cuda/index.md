@@ -12,7 +12,7 @@ skills:
 ---
 ## Introduction  
 
-Neural Network is a type of computational model that is inspired by the human brain, in which the neurons are organized in layers and the neurons in different layer are interconnected. Neural networks has many application in autonomous driving, natural language processing and image/speech recognition. In this technical blog, I will discuss CUDA implementation of one forward and backward propagation of a three-layer neural network, in which the result of the CUDA implementation was compared with Pytorch implementation. The comparison with Pytorch implementation helps with debugging since Pytorch has been well tested by the deep learning development community. The Pytorch initialized weights and biases are used in CUDA implementation because it easier for comparison between Pytorch and CUDA implementation. This blog experimented with allocating one memory for the weights and biases of one layer however the storage will be restricted to column major for efficient memory bandwith. This technical blog is intended to document my understanding on how neural network works and its CUDA implementation. Additionally, the kernel functions used in this blog were not optimized. I discussed kernel optimization in this [blog](https://chukwuk.github.io/blogs/euclidean-distance-matrix-project/index/) and also there is a lot of optimization opportunities for all the kernel functions used here. 
+Neural Network is a type of computational model that is inspired by the human brain, in which the neurons are organized in layers and the neurons in different layer are interconnected. Neural networks has many application in autonomous driving, natural language processing and image/speech recognition. In this technical blog, I will discuss CUDA implementation of one forward and backward propagation of a three-layer neural network, in which the result of the CUDA implementation was compared with Pytorch implementation. The comparison with Pytorch implementation helps with debugging since Pytorch has been well tested by the deep learning development community. The Pytorch initialized weights and biases are used in CUDA implementation because it easier for comparison between Pytorch and CUDA implementation. This blog experimented with allocating one memory for the weights and biases of a layer however the storage will be restricted to column major for efficient memory bandwith. This technical blog is intended to document my understanding on how neural network works and its CUDA implementation. Additionally, the kernel functions used in this blog were not optimized. I discussed kernel optimization in this [blog](https://chukwuk.github.io/blogs/euclidean-distance-matrix-project/index/) and also there is a lot of optimization opportunities for all the kernel functions used here. 
 
 ## Forward Propagation
 
@@ -24,7 +24,7 @@ Forward propagation is a process where the neural network takes an input to prod
  
 ### First Layer (First step).
 
-The first step involves matrix multiplication between First layer weights and input data and then the addition of the First Layer bias. Row major storage is used to weight and bias in GPU memory while column major storage is used to store the input data in GPU memory. The column major storage is used to store the matrix mutiplication product in GPU memory. The first step result is left in the GPU memory to be used by the second step. Please note, different memory should be allocated for the weight and bias for one layer rather one memory for weight and bias of one layer as in this blog.   
+The first step involves matrix multiplication between First layer weights and input data and then the addition of the First Layer bias. Row major storage is used to weight and bias in GPU memory while column major storage is used to store the input data in GPU memory. The column major storage is used to store the matrix mutiplication product in GPU memory. The first step result is left in the GPU memory to be used by the second step.   
     
 ### matrix representation of the first step
 {% include image-gallery.html images="step_1_matrix_multiply.png" height="200" %} 
@@ -244,7 +244,7 @@ The first step is the similar to the third step but it is for the derivatives of
 
 ## Conclusion
 
-This techical blog discussed step by step CUDA implementation of a one forward and backpropagation of a three layer neural network and compared results with Pytorch. Different memory will be allocated for weights and biases in future technical blog since it takes more computation to seperate the weights and biases derivatives computation when scaling up the algorithm. All my code is available on [Github](https://github.com/chukwuk/CUDA_implementation_of_a_three_layer_neural_network/tree/main).
+This techical blog discussed step by step CUDA implementation of a one forward and backpropagation of a three layer neural network and compared results with Pytorch. All my code is available on [Github](https://github.com/chukwuk/CUDA_implementation_of_a_three_layer_neural_network/tree/main).
 
 ## References
 
