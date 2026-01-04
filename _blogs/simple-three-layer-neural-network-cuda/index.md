@@ -33,20 +33,17 @@ The first step involves matrix multiplication between First layer weights and in
 __global__  void matrixMulAddRowBasedARR2(float* weightBias, float* xData,  float* activationValues, int wRows,  int xCols, int wColsXRows) {
    int gid =  blockIdx.x *  blockDim.x +  threadIdx.x;
     if (gid < (wRows * xCols)) {
-        	
-	int index = gid / wRows;
-	int indexR = gid - (index * wRows);
-        int indexW = index * (wColsXRows);
-        int indexMul = indexR * (wColsXRows+1); 
-    	float sum = 0.0;
-	for (int i = 0; i < wColsXRows; i++)  {
-	   sum+=(weightBias[i+indexMul] * xData[i+indexW]);
-           
-       	}
-	sum+=weightBias[indexMul+wColsXRows];
-        activationValues[gid] = sum;	
+	   int index = gid / wRows;
+	   int indexR = gid - (index * wRows);
+       int indexW = index * (wColsXRows);
+       int indexMul = indexR * (wColsXRows+1); 
+       float sum = 0.0;
+	   for (int i = 0; i < wColsXRows; i++)  {
+	    sum+=(weightBias[i+indexMul] * xData[i+indexW]);
+       }
+       sum+=weightBias[indexMul+wColsXRows];
+       activationValues[gid] = sum;	
     }
-
 }
 ```
 ### First layer (second step).
@@ -57,9 +54,7 @@ The second step involves applying the ReLu function on the product of the first 
 ```cuda
 // kernel function for the second step
 __global__  void matrixReLu(float* activation, int actLength) {
-     
     int gid =  blockIdx.x *  blockDim.x +  threadIdx.x;
-
     if (gid < actLength) {
        activation[gid] = (activation[gid] > 0.0) ? activation[gid] : 0.0;
     }
@@ -88,7 +83,6 @@ Fifth step operation is the same as the first step but it involves matrix mutipl
 __global__  void matrixMulAddRowBasedARR(float* weightBias, float* xData,  float* activationValues, int wRows,  int xCols, int wColsXRows) {
    int gid =  blockIdx.x *  blockDim.x +  threadIdx.x;
     if (gid < (wRows * xCols)) {
-        	
 	   int index = gid / xCols;
        int indexR = gid - (index * xCols);
        int indexW = index * (wColsXRows+1);
@@ -113,9 +107,7 @@ The sixth step involves applying the sigmoid function on the product of the fift
 ```cuda
 // Kernel function for the sixth step
 __global__  void matrixSigmoid(float* activation, int actLength) {
-     
     int gid =  blockIdx.x *  blockDim.x +  threadIdx.x;
-
     if (gid < actLength) {
        activation[gid] = 1/(1 + exp(-activation[gid]));
     }
@@ -123,17 +115,14 @@ __global__  void matrixSigmoid(float* activation, int actLength) {
 ```
 ## Backward propagation.
 
-Backward propagation involves changing the weight and biases through the network in other to minimize the error. The backward propagation is more computationally complex than the forward propagation because it involves calculation of the gradient of the weights and biases by applying chain rules backward through the neural network. In the technical blog, the cuda implementation of the backward propagation was simplified by starting from the sixth step. 
+Backward propagation involves changing the weight and biases through the network in other to minimize the error. The backward propagation is more computationally complex than the forward propagation because it involves calculation of the gradient of the weights and biases by applying chain rules backward through the neural network. In this technical blog, the cuda implementation of the backward propagation was simplified by starting from the sixth step. 
 ### Sixth step
 The sixth step involves substracting the actual data from the predicted data (dL/dZ3).  
 {% include image-gallery.html images="backward_propagation_1.png" height="200" %} 
 ```cuda
 // kernel function for the sixth step
 __global__  void elementWiseSub(float* firstArray, float* secondArray, int arraySize) {
-
-   
    int gid = blockIdx.x * blockDim.x + threadIdx.x;
-   
    if (gid < (arraySize)) {
 	firstArray[gid]=firstArray[gid] - secondArray[gid]; 
    }
@@ -143,22 +132,19 @@ __global__  void elementWiseSub(float* firstArray, float* secondArray, int array
 <br>
 ### Fifth step
 
-The fifth step requires calculating the derivatives of W3, b3 and a2 with respect with to the loss function. The dL/dZ3 is multiplied with the transpose of a2 to get dW3 and db3. Transpose of W3 is multiplied with dL/dZ3 to get dL/da2. The matrixTransposeAddBias will lead to allocating extra GPU memory for dL/da2, that is the (number of training data * bias datatype size). Therefore, matrixdL_dW3 function will be updated so that extra GPU memory will not be allocated for dL/da2.       
+The fifth step requires calculating the derivatives of W3, b3 and a2 with respect with to the loss function. The dL/dZ3 is multiplied with the transpose of a2 to get dW3 and db3. Please note, an extra column filled up with 1 was added to a2. Transpose of W3 is multiplied with dL/dZ3 to get dL/da2. The matrixTransposeAddBias will lead to allocating extra GPU memory for dL/da2, that is the (number of training data * bias datatype size). Therefore, matrixdL_dW3 function will be updated so that extra GPU memory will not be allocated for dL/da2.       
 
 ```cuda
 // kernel function used for transpose a2 from column major storage to row major storage.
 // kernel function add one extra rows that is filled with one b/cos it used to calculate dL/db3 since W and b is in the same matrix 
 __global__  void matrixTransposeAddBias(float* matrixArray, float* matrixArrayTranspose, int nrows, int ncols) {
-     
     int gid =  blockIdx.x *  blockDim.x +  threadIdx.x;
     int index = gid / ncols;
     int indexR = gid - (index * ncols);
-
     if (gid < (nrows*(ncols+1))) {
        if (gid < (nrows*ncols)) { 
           matrixArrayTranspose[index+(indexR*nrows)] = matrixArray[gid];
        } else {
-
           matrixArrayTranspose[gid] = 1.0;
        }
        
@@ -170,8 +156,7 @@ __global__  void matrixTransposeAddBias(float* matrixArray, float* matrixArrayTr
 // kernel function for calculation of dL/dW3 and dL/db3 
 __global__  void matrixdL_dW3(float* weightBias, float* xData,  float* activationValues, int wRows,  int xCols, int wColsXRows) {
    int gid =  blockIdx.x *  blockDim.x +  threadIdx.x; 
-    if (gid < (wRows * xCols)) {
-        	
+    if (gid < (wRows * xCols)) {	
         int index = gid / xCols;
         int indexW = index * (wColsXRows);
         int indexStart = gid % xCols;
@@ -191,16 +176,12 @@ __global__  void matrixdL_dW3(float* weightBias, float* xData,  float* activatio
 // kernel function is used to update the weight and biases with adam optimizer
 __global__  void AdamOptUpdate(float* weightBias, float* dL_dW3, int len, float lr, float beta1, float beta2, float epsilon, float* mt, float* vt) {
    int gid =  blockIdx.x *  blockDim.x +  threadIdx.x;
-    if (gid < len) {
-        
-        mt[gid] = (beta1*mt[gid]) + (1 - beta1)*dL_dW3[gid];	
-        vt[gid] = (beta2*vt[gid]) + (1 - beta2)*(powf(dL_dW3[gid], 2.0));
-
-	float mt_crt = mt[gid]/(1-beta1);
-	float vt_crt = vt[gid]/(1-beta2);
-	
-	weightBias[gid] = weightBias[gid] - ((mt_crt/(sqrt(vt_crt + epsilon)))*lr);
-         	
+   if (gid < len) {
+       mt[gid] = (beta1*mt[gid]) + (1 - beta1)*dL_dW3[gid];	
+       vt[gid] = (beta2*vt[gid]) + (1 - beta2)*(powf(dL_dW3[gid], 2.0));
+       float mt_crt = mt[gid]/(1-beta1);
+	   float vt_crt = vt[gid]/(1-beta2);
+	   weightBias[gid] = weightBias[gid] - ((mt_crt/(sqrt(vt_crt + epsilon)))*lr);  	
     }
 
 }
@@ -209,31 +190,28 @@ __global__  void AdamOptUpdate(float* weightBias, float* dL_dW3, int len, float 
 // kernel function is used to calculate dL/da2 from the matrix multiplication of W3 Transpose with dL/dZ3 
 __global__  void matrixMultRow(float* weightBias, float* xData,  float* activationValues, int wRows,  int xCols, int wColsXRows) {
    int gid =  blockIdx.x *  blockDim.x +  threadIdx.x;   
-    if (gid < (wRows * xCols)) {
-        	
-        int index = gid / xCols;
-        int indexW = index * (wColsXRows);
-        int indexStart = gid % xCols;
-        int IndexMul = indexStart * wColsXRows; 
-    	float sum = 0.0;
-	    for (int i = 0; i < wColsXRows; i++)  {
-	       sum+=(weightBias[i+indexW] * xData[i+IndexMul]);  
-       	}
-        activationValues[gid] = sum;	
+   if (gid < (wRows * xCols)) {
+      int index = gid / xCols;
+      int indexW = index * (wColsXRows);
+      int indexStart = gid % xCols;
+      int IndexMul = indexStart * wColsXRows; 
+      float sum = 0.0;
+	  for (int i = 0; i < wColsXRows; i++)  {
+	     sum+=(weightBias[i+indexW] * xData[i+IndexMul]);  
+      }
+      activationValues[gid] = sum;	
     }
 }
 ```
 ### Fourth step
 
-The derivative of the ReLu(x) is one if ReLu(x) is x and zero if ReLu(x) is 0. The fourth step is the elementwise multiplication of the derivative of ReLu(x) with dL/da2. 
+The derivative of the ReLu(x) is one if ReLu(x) is x and zero if ReLu(x) is 0. The fourth step is the elementwise multiplication of the derivative of ReLu(Z2) with dL/da2 to get dL/dZ2.  
 {% include image-gallery.html images="backward_propagation_2.png" height="200" %} 
 <br>
 ```cuda
 // kernel function for the derivative of the ReLu function
 __global__  void matrixDiffReLu(float* activation, int actLength) {
-     
     int gid =  blockIdx.x *  blockDim.x +  threadIdx.x;
-
     if (gid < actLength) {
        activation[gid] = (activation[gid] > 0.0) ? 1.0 : 0.0;
     }
@@ -243,7 +221,6 @@ __global__  void matrixDiffReLu(float* activation, int actLength) {
 // kernel function for the elementwise multiplication of dL/da2 * ReLu'(Z2]
 __global__  void elementWiseMult(float* firstArray, float* secondArray, float* outputArray, int arraySize) {
    int gid = blockIdx.x * blockDim.x + threadIdx.x;
-   
    if (gid < (arraySize)) {
 	outputArray[gid]=firstArray[gid] * secondArray[gid]; 
    }
@@ -252,7 +229,7 @@ __global__  void elementWiseMult(float* firstArray, float* secondArray, float* o
 ```
 ### Third step
 
-The third step is the same as the fifth step but it is for the derivatives of W2, b2 and a1 with respect with to the loss function. The dL/dZ2 is multiplied with the transpose of a1 to get dW2 and db2. Transpose of W3 is multiplied with dL/dZ2 to get dL/da2. Third step uses the same kernel function as the fifth step.
+The third step is the same as the fifth step but it is for the derivatives of W2, b2 and a1 with respect with to the loss function. The dL/dZ2 is multiplied with the transpose of a1 to get dW2 and db2. Transpose of W2 is multiplied with dL/dZ2 to get dL/da1. Third step uses the same kernel function as the fifth step.
 
 {% include image-gallery.html images="step_4_backward_propagation_1.png" height="200" %} 
 {% include image-gallery.html images="step_4_backward_propagation_2.png" height="200" %} 
@@ -260,15 +237,15 @@ The third step is the same as the fifth step but it is for the derivatives of W2
 
 ### Second step
 
-The second step is the same as the fourth step.  
+The second step is similar to the fourth step but it is the is the elementwise multiplication of the derivative of ReLu(Z1) with dL/da1 to get dL/dZ1.   
 {% include image-gallery.html images="backward_propagation_3.png" height="200" %} 
 <br>
 ### First step
-The first step is the same as the third step but it is for the derivatives of W1 and b1 with respect with to the loss function. 
+The first step is the similar to the third step but it is for the derivatives of W1 and b1 with respect with to the loss function. 
 
 ## Conclusion
 
-This techical blog discussed step by step CUDA implementation of a one forward and backpropagation of a three layer neural network and compare results with Pytorch. Different memory will be allocated for weights and biases in future technical blog since it takes more computation to seperate the weights and biases derivatives computation when scaling up the algorithm. All my code is available on [Github](https://github.com/chukwuk/CUDA_implementation_of_a_three_layer_neural_network/tree/main).
+This techical blog discussed step by step CUDA implementation of a one forward and backpropagation of a three layer neural network and compared results with Pytorch. Different memory will be allocated for weights and biases in future technical blog since it takes more computation to seperate the weights and biases derivatives computation when scaling up the algorithm. All my code is available on [Github](https://github.com/chukwuk/CUDA_implementation_of_a_three_layer_neural_network/tree/main).
 
 ## References
 
