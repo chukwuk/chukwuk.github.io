@@ -132,7 +132,7 @@ __global__  void elementWiseSub(float* firstArray, float* secondArray, int array
 <br>
 ### Fifth step
 
-The fifth step requires calculating the derivatives of W3, b3 and a2 with respect with to the loss function. The dL/dZ3 is multiplied with the transpose of a2 to get dW3 and db3. Please note, an extra column (filled up with 1) was added to a2 in the matrixTransposeAddBias function. This will require allocating extra GPU memory for a2, which is the size of one column of a2. Therefore, in the future, matrixdL_dW3 function will be updated so that extra GPU memory will not be allocated for a2. Transpose of W3 is multiplied with dL/dZ3 to get dL/da2.       
+The fifth step requires calculating the derivatives of the loss function with respect to W3, b3 and a2. The dL/dZ3 is multiplied with the transpose of a2 to get dW3 and db3. Please note, an extra column (filled up with 1) was added to a2 in the matrixTransposeAddBias function. This will require allocating extra GPU memory for a2, which is the size of one column of a2. Therefore, in the future, matrixdL_dW3 function will be updated so that extra GPU memory will not be allocated for a2. Transpose of W3 is multiplied with dL/dZ3 to get dL/da2.       
 ```cuda
 // kernel function used for transpose a2 from column major storage to row major storage.
 // kernel function add one extra rows that is filled with one b/cos it used to calculate dL/db3 since W and b is in the same matrix 
@@ -228,7 +228,7 @@ __global__  void elementWiseMult(float* firstArray, float* secondArray, float* o
 ```
 ### Third step
 
-The third step is the same as the fifth step but it is for the derivatives of W2, b2 and a1 with respect with to the loss function. The dL/dZ2 is multiplied with the transpose of a1 to get dW2 and db2. Transpose of W2 is multiplied with dL/dZ2 to get dL/da1. Third step uses the same kernel function as the fifth step.
+The third step is the same as the fifth step but it is for the derivatives of the loss function with respect to W2, b2 and a1. The dL/dZ2 is multiplied with the transpose of a1 to get dW2 and db2. Transpose of W2 is multiplied with dL/dZ2 to get dL/da1. Third step uses the same kernel function as the fifth step.
 
 {% include image-gallery.html images="step_4_backward_propagation_1.png" height="200" %} 
 {% include image-gallery.html images="step_4_backward_propagation_2.png" height="200" %} 
@@ -240,7 +240,7 @@ The second step is similar to the fourth step but it is the is the elementwise m
 {% include image-gallery.html images="backward_propagation_3.png" height="200" %} 
 <br>
 ### First step
-The first step is the similar to the third step but it is for the derivatives of W1 and b1 with respect with to the loss function. 
+The first step is the similar to the third step but it is for the derivatives of the loss function with respect to W1 and b1. 
 
 ## Conclusion
 
