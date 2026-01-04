@@ -132,8 +132,7 @@ __global__  void elementWiseSub(float* firstArray, float* secondArray, int array
 <br>
 ### Fifth step
 
-The fifth step requires calculating the derivatives of W3, b3 and a2 with respect with to the loss function. The dL/dZ3 is multiplied with the transpose of a2 to get dW3 and db3. Please note, an extra column filled up with 1 was added to a2. Transpose of W3 is multiplied with dL/dZ3 to get dL/da2. The matrixTransposeAddBias will lead to allocating extra GPU memory for dL/da2, that is the (number of training data * bias datatype size). Therefore, matrixdL_dW3 function will be updated so that extra GPU memory will not be allocated for dL/da2.       
-
+The fifth step requires calculating the derivatives of W3, b3 and a2 with respect with to the loss function. The dL/dZ3 is multiplied with the transpose of a2 to get dW3 and db3. Please note, an extra column (filled up with 1) was added to a2 in the matrixTransposeAddBias function. This will require allocating extra GPU memory for a2, which is the size of one column of a2. Therefore, in the future, matrixdL_dW3 function will be updated so that extra GPU memory will not be allocated for a2. Transpose of W3 is multiplied with dL/dZ3 to get dL/da2.       
 ```cuda
 // kernel function used for transpose a2 from column major storage to row major storage.
 // kernel function add one extra rows that is filled with one b/cos it used to calculate dL/db3 since W and b is in the same matrix 
