@@ -192,7 +192,7 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
 
 ## Kernel 4: Instruction Optimization.
 
-The 32-bit integer division takes significantly more clock cycle than 32-bit integer multiplication, addition and subtraction. According to [CUDA C++ Best Practices Guide](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/), Both 32-bit integer addition and 32-bit integer compare takes one clock cycle per multiprocessor while 32-bit integer multiplication takes 2 clock cycle per multiprocessor. The 32-bit integer divison was replaced with 32-bit integer addition, multiplication and compare, which increased the compute and memory throughput to 1881 GFLOPS and 681 GB/s  based on nsight compute analysis. Microbenchmarking shows that the 32-bit integer division takes approximately 200 clock cycle while the combination of the 32-bit integer addition, multiplication and compare takes approximately 20 clock cycle. Considering, the number of iterations, the approximate runtime difference is ((200 - 20) * 30336)/2.4GHz = 2.28 milliseconds, which is approximately the runtime difference between kernel 3 and kernel 4 based on nsight compute analysis. This runtime difference increase linearly with number of iteration (number of 2D coordinate data points), which shows the importance of instruction optimization when scaling up an algorithm. The code for microbenchmarking is available on my [Github repo](https://github.com/chukwuk/Optimized_GPU_version_for_euclidean_matrix/tree/master/compare_division_clock_cycle_with_bit_compare). The GPU throughput rooflines shows the memory bandwith boundary meets the peak performance boundary.    
+The 32-bit integer division takes significantly more clock cycle than 32-bit integer multiplication, addition and subtraction. According to [CUDA C++ Best Practices Guide](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/), Both 32-bit integer addition and 32-bit integer compare takes one clock cycle per multiprocessor while 32-bit integer multiplication takes 2 clock cycle per multiprocessor. The 32-bit integer divison was replaced with 32-bit integer addition, multiplication and compare, which increased the compute and memory throughput to 1881 GFLOPS and 681 GB/s  based on nsight compute analysis. Microbenchmarking shows that the 32-bit integer division takes approximately 200 clock cycle while the combination of the 32-bit integer addition, multiplication and compare takes approximately 20 clock cycle. Considering, the number of iterations, the approximate runtime difference is ((200 - 20) * 30336)/2.4GHz = 2.28 milliseconds, which is approximately the runtime difference between kernel 3 and kernel 4 based on nsight compute analysis. This runtime difference increase linearly with number of iteration (number of 2D coordinate data points), which shows the importance of instruction optimization when scaling up an algorithm. The code for microbenchmarking is available on my [Github repo](https://github.com/chukwuk/Optimized_GPU_version_for_euclidean_matrix/tree/master/compare_division_clock_cycle_with_bit_compare). The GPU throughput rooflines shows the memory bandwith boundary meets the peak performance boundary. Please note, the number of 2D coordinate data points should always be greater than the blocksize when using this kernel function.     
 
 ```cuda
 // Kernel function with instruction optimization
@@ -263,7 +263,19 @@ __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, fl
 
 ## Kernel 5: Multi-Stage Asynchronous Data Copies using cuda::pipeline. 
 
-cuda::pipeline is a CUDA feature that allows overlap of computation with data movement. For kernel 5, the data movement from the global to shared memory was overlapped with the computation. However, this reduced compute and memory throughput to 1690GFLOPS and 612GB/s based on compute analysis. Additionally, the nsight compute analysis shows that the L2 local load access pattern and DRAM local store access pattern is not optimal, which means some local variable spill into L2 cache and DRAM.    
+cuda::pipeline is a CUDA feature that allows overlap of computation with data movement. For kernel 5, the data movement from the global to shared memory was overlapped with the computation. However, this reduced compute and memory throughput to 1690GFLOPS and 612GB/s based on compute analysis. Additionally, the nsight compute analysis shows that the L2 local load access pattern and DRAM local store access pattern is not optimal, which means some local variable spill into L2 cache and DRAM. However, compiling the code with -Xptxas -v flag shows that there is no register spilling, which suggest that the register spilling is from the dynamic indexing of the shared_offset array.
+
+```
+ptxas info    : 0 bytes gmem
+ptxas info    : Compiling entry function '_Z34euclideanMatrixDynamicSharedMemoryP12LocationPrimPfmi' for 'sm_120'
+ptxas info    : Function properties for _Z34euclideanMatrixDynamicSharedMemoryP12LocationPrimPfmi
+    16 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 39 registers, used 1 barriers, 16 bytes cumulative stack size, 48 bytes smem
+ptxas info    : Compile time = 40.590 ms
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o: in function `_start':
+(.text+0x1b): undefined reference to `main'
+collect2: error: ld returned 1 exit status
+```    
  
 ```cuda
 __global__  void euclideanMatrixDynamicSharedMemory(LocationPrim *cordinates, float* euclideanDistance, size_t NUMDATA, int numDataPerThread) {
