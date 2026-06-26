@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Optimizing matrix multiplication on NVIDIA GPU.
-description: Matrix multiplication optimization that achieves 86 percent of CUBLAS performance.
+description: Matrix multiplication optimization that achieves 86.5 percent of CUBLAS performance.
 skills: 
   - CUDA Programming.
   - C++/C Programming.
