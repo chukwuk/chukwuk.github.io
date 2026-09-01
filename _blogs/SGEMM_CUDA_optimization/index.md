@@ -15,6 +15,12 @@ skills:
 ## Introduction.
 
 
+| Matrix Size (MxKxN) | fp32 Custom GEMM Kernel | cuBLAS  | Speedup |
+| ------------------- | ----------------------- | ------- | ------- |
+| 4096x4096x4096    | 26.77 GFLOPS  | 30.07 GFLOPS | 0.89x |
+| 10240x4096x4096   | 28.22 GFLOPS  | 30.70 GFLOPS | 0.92x |
+| 16384x16384x16384 | 29.47 GFLOPS  | 31.80 GFLOPS | 0.93x |
+
 ## Memory bound vs Compute bound for Matrix Multiplication.
 
 ## Kernel 1: Naive implementation.
@@ -32,11 +38,6 @@ skills:
 
 ## Summary
 
-| Column 1 Header | Column 2 Header | Column 3 Header |
-| --------------- | --------------- | --------------- |
-| Row 1 Column 1 | Row 1 Column 2 | Row 1 Column 3 |
-| Row 2 Column 1 | Row 2 Column 2 | Row 2 Column 3 |
-| Row 3 Column 1 | Row 3 Column 2 | Row 3 Column 3 |
 
 
 ## Conclusion
