@@ -1,7 +1,7 @@
 ---
 layout: post
-title: Optimizing FP32 Matrix Multiplication on NVIDIA GPU, that achieves 91.9 percent of CUBLAS performnce based on Nsight Compute Analysis.
-description: FP32 Matrix multiplication optimization that achieves 91.9 percent of CUBLAS performance.
+title: Optimizing FP32 Matrix Multiplication on NVIDIA GPU, that achieves 93 percent of CUBLAS performnce based on Nsight Compute Analysis.
+description: FP32 Matrix multiplication optimization that achieves 93 percent of CUBLAS performance.
 skills: 
   - CUDA Programming.
   - C++/C Programming.
