@@ -25,7 +25,7 @@ Matrix multiplication is an important algorithm used in training and inference o
 ## Memory bound vs Compute bound for Matrix Multiplication.
 
 
-The matrix mutiplication to produce one output data involves element wise multiplication of A rows with B column and then addition of the products. Therefore, for matrix size (M=10240, K=4096, N=4096), the number of flops required for one output data is (4096 * 2) FLOPS. 
+The matrix mutiplication to produce one output data involves element wise multiplication of A rows with B column and then addition of the products. Therefore, for matrix size (M=10240, K=4096, N=4096), the number of flops required for one output data is (4096 * 2) FLOP. 
 
    1. Total FLOPS: 2 * 4096 * 4096 * 10240 FLOP = (0.34 TFLOP).
    2. Minimum total data to read: 10240 * 4096 * 4B + 4096 * 4096 * 4B = 234881024B(234 MB).
