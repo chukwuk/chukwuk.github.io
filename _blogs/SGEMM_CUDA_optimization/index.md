@@ -14,6 +14,8 @@ skills:
 ---
 ## Introduction.
 
+Matrix multiplication is an important algorithm used in training and inference of large deep neural network models, in which the matrix multiplication algorithm for the large deep neural networks models run on GPU hardware because parallel processing of the output data. For the deep neural network models to be faster, the matrix multiplication algorithm should run efficiently on the GPU hardware. In this technical blog, I will discuss step by step on how to optimize matrix multiplication algorithm on NVIDIA GPU (RTX 5070ti) to get 93% performance of cuBLAS. cuBLAS is optimized NVIDIA library for basic linear algebra.  
+
 
 | Matrix Size (MxKxN) | fp32 Custom GEMM Kernel | cuBLAS  | Speedup |
 | ------------------- | ----------------------- | ------- | ------- |
