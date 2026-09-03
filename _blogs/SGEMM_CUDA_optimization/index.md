@@ -14,16 +14,24 @@ skills:
 ---
 ## Introduction.
 
-Matrix multiplication is an important algorithm used in training and inference of large deep neural network models, in which the matrix multiplication algorithm for the large deep neural networks models run on GPU hardware because parallel processing of the output data. For the deep neural network models to be faster, the matrix multiplication algorithm should run efficiently on the GPU hardware. In this technical blog, I will discuss step by step on how to optimize matrix multiplication algorithm on NVIDIA GPU (RTX 5070ti) to get 93% performance of cuBLAS. cuBLAS is optimized NVIDIA library for basic linear algebra. The matrix size (M=10240,K=4096,N=4096) will be used for the step by step optimization discussion.  
+Matrix multiplication is an important algorithm used in training and inference of large deep neural network models, in which the matrix multiplication algorithm for the large deep neural networks models run on GPU hardware because parallel processing of the output data. For the deep neural network models to be faster, the matrix multiplication algorithm should run efficiently on the GPU hardware. In this technical blog, I will discuss step by step on how to optimize matrix multiplication algorithm on NVIDIA GPU (RTX 5070 Ti) to get 93% performance of cuBLAS. cuBLAS is optimized NVIDIA library for basic linear algebra. The matrix size (M=10240,K=4096,N=4096) will be used for the step by step optimization discussion.  
 
 | Matrix Size (MxKxN) | fp32 Custom GEMM Kernel | cuBLAS  | Speedup |
 | ------------------- | ----------------------- | ------- | ------- |
-| 4096x4096x4096    | 26.77 GFLOPS  | 30.07 GFLOPS | 0.89x |
-| 10240x4096x4096   | 28.22 GFLOPS  | 30.70 GFLOPS | 0.92x |
-| 16384x16384x16384 | 29.47 GFLOPS  | 31.80 GFLOPS | 0.93x |
+| 4096x4096x4096    | 26.77 TFLOPS  | 30.07 TFLOPS | 0.89x |
+| 10240x4096x4096   | 28.22 TFLOPS  | 30.70 TFLOPS | 0.92x |
+| 16384x16384x16384 | 29.47 TFLOPS  | 31.80 TFLOPS | 0.93x |
 
 ## Memory bound vs Compute bound for Matrix Multiplication.
 
+
+The matrix mutiplication to produce one output data involves element wise multiplication of A rows with B column and then addition of the products. Therefore, for matrix size (M=10240, K=4096, N=4096), the number of flops required for one output data is (4096 * 2) FLOPS. 
+
+   1. Total FLOPS: 2 * 4096 * 4096 * 10240 FLOP = (0.34 TFLOP).
+   2. Minimum total data to read: 10240 * 4096 * 4B + 4096 * 4096 * 4B = 234881024B(234 MB).
+   3. Total data to write: 10240 * 4096 * 4B = 167772160B(167 MB).
+   
+The Nvidia RTX 5070 Ti has a memory bandwith of 896GB/sec and has a fp32 compute throughput of 41 TFLOPS. Therefore, the theoretical time for the calculation is 8.29 milliseconds while the theoretical total time for data read and write is 0.46 milliseconds assuming the both total read and write is 401 MB. This simple theoretical calculation shows that the matrix multiplication is compute-bound.       
 
 
 ## Kernel 1: Naive implementation.
