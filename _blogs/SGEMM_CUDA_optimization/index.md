@@ -28,10 +28,10 @@ Matrix multiplication is an important algorithm used in training and inference o
 The matrix mutiplication to produce one output data involves element wise multiplication of A rows with B column and then addition of the products. Therefore, for matrix size (M=10240, K=4096, N=4096), the number of flops required for one output data is (4096 * 2) FLOP. 
 
    1. Total FLOPS: 2 * 4096 * 4096 * 10240 FLOP = (0.34 TFLOP).
-   2. Minimum total data to read: 10240 * 4096 * 4B + 4096 * 4096 * 4B = 234881024B(234 MB).
-   3. Total data to write: 10240 * 4096 * 4B = 167772160B(167 MB).
+   2. Minimum total data to read: 10240 * 4096 * 4B + 4096 * 4096 * 4B +  4096 * 4096 * 4B = 301989888B(302 MB).
+   3. Total data to write: 10240 * 4096 * 4B = 167772160B(168 MB).
    
-The Nvidia RTX 5070 Ti has a memory bandwith of 896GB/sec and has a fp32 compute throughput of 41 TFLOPS. Therefore, the theoretical time for the calculation is 8.29 milliseconds while the theoretical total time for data read and write is 0.46 milliseconds assuming the both total read and write is 401 MB. This simple theoretical calculation shows that the matrix multiplication is compute-bound.       
+The Nvidia RTX 5070 Ti has a memory bandwith of 896GB/sec and has a fp32 compute throughput of 41 TFLOPS. Therefore, the theoretical time for the calculation is 8.29 milliseconds while the theoretical total time for data read and write is 0.54 milliseconds assuming the both total read and write is 470 MB. This simple theoretical calculation shows that the matrix multiplication is compute-bound.       
 
 
 ## Kernel 1: Naive implementation.
